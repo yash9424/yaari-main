@@ -64,7 +64,9 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
             >
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+                  <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden">
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=User${user.id}`} alt="User" className="w-full h-full object-cover" />
+                  </div>
                   <div className={`absolute bottom-0 right-0 w-4 h-4 ${user.statusColor} rounded-full border-2 border-white flex items-center justify-center`}>
                     {user.status === 'online' && (
                       <span className="text-white text-xs font-bold">✓</span>

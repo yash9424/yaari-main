@@ -9,6 +9,10 @@ import ProfileMenuScreen from '../components/ProfileMenuScreen'
 import DashboardScreen from '../components/DashboardScreen'
 import CoinPurchaseScreen from '../components/CoinPurchaseScreen'
 import UserDetailScreen from '../components/UserDetailScreen'
+import CallHistoryScreen from '../components/CallHistoryScreen'
+import TransactionHistoryScreen from '../components/TransactionHistoryScreen'
+import CustomerSupportScreen from '../components/CustomerSupportScreen'
+import EditProfileScreen from '../components/EditProfileScreen'
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState('login')
@@ -29,7 +33,21 @@ export default function Home() {
       case 'userdetail':
         return <UserDetailScreen userId={selectedUserId!} onBack={() => setCurrentScreen('userlist')} />
       case 'profile':
-        return <ProfileMenuScreen onBack={() => setCurrentScreen('userlist')} />
+        return <ProfileMenuScreen 
+          onBack={() => setCurrentScreen('userlist')} 
+          onCallHistory={() => setCurrentScreen('callhistory')}
+          onTransactionHistory={() => setCurrentScreen('transactionhistory')}
+          onCustomerSupport={() => setCurrentScreen('customersupport')}
+          onEditProfile={() => setCurrentScreen('editprofile')}
+        />
+      case 'callhistory':
+        return <CallHistoryScreen onBack={() => setCurrentScreen('profile')} />
+      case 'transactionhistory':
+        return <TransactionHistoryScreen onBack={() => setCurrentScreen('profile')} />
+      case 'customersupport':
+        return <CustomerSupportScreen onBack={() => setCurrentScreen('profile')} />
+      case 'editprofile':
+        return <EditProfileScreen onBack={() => setCurrentScreen('profile')} />
       case 'coins':
         return <CoinPurchaseScreen onBack={() => setCurrentScreen('userlist')} />
       case 'dashboard':
