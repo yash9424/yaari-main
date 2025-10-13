@@ -2,6 +2,8 @@ import { Heart, User as UserIcon, Video, Phone } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import CallConfirmationScreen from './CallConfirmationScreen'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface UserListScreenProps {
   onNext: () => void
@@ -20,14 +22,16 @@ interface User {
 }
 
 export default function UserListScreen({ onNext, onProfileClick, onCoinClick, onUserClick, onStartCall }: UserListScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   const [showCallModal, setShowCallModal] = useState(false)
   const [selectedCall, setSelectedCall] = useState<{ user: User; type: 'video' | 'audio'; rate: number } | null>(null)
 
   const users: User[] = [
-    { id: 1, name: 'User Name', attributes: 'Attributes', status: 'online', statusColor: 'bg-green-500' },
-    { id: 2, name: 'User Name', attributes: 'Attributes', status: 'online', statusColor: 'bg-green-500' },
-    { id: 3, name: 'User Name', attributes: 'Attributes', status: 'busy', statusColor: 'bg-red-500' },
-    { id: 4, name: 'User Name', attributes: 'Attributes', status: 'offline', statusColor: 'bg-gray-400' },
+    { id: 1, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'online', statusColor: 'bg-green-500' },
+    { id: 2, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'online', statusColor: 'bg-green-500' },
+    { id: 3, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'busy', statusColor: 'bg-red-500' },
+    { id: 4, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'offline', statusColor: 'bg-gray-400' },
   ]
 
   const handleCallClick = (user: User, type: 'video' | 'audio', rate: number, e: React.MouseEvent) => {
@@ -92,7 +96,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
                 </div>
                 <div className={`absolute bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 ${user.statusColor} rounded-full text-white text-xs font-medium flex items-center space-x-1`}>
                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                  <span className="capitalize">{user.status}</span>
+                  <span className="capitalize">{user.status === 'online' ? t.online : user.status === 'offline' ? t.offline : t.busy}</span>
                 </div>
               </div>
               <div className="flex-1">

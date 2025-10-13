@@ -3,10 +3,16 @@ import { ChevronLeft } from 'lucide-react'
 
 interface LanguageScreenProps {
   onNext: () => void
+  onSelectLanguage: (lang: 'en' | 'hi') => void
 }
 
-export default function LanguageScreen({ onNext }: LanguageScreenProps) {
+export default function LanguageScreen({ onNext, onSelectLanguage }: LanguageScreenProps) {
   const [selectedLanguage, setSelectedLanguage] = useState('हिंदी')
+
+  const handleNext = () => {
+    onSelectLanguage(selectedLanguage === 'English' ? 'en' : 'hi')
+    onNext()
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col p-6">
@@ -37,7 +43,7 @@ export default function LanguageScreen({ onNext }: LanguageScreenProps) {
         </div>
         
         <button 
-          onClick={onNext}
+          onClick={handleNext}
           className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8"
         >
           Next

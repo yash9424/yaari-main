@@ -1,32 +1,36 @@
 import { ArrowLeft, Shield, Lock, Eye, EyeOff, Bell, UserX } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface PrivacySecurityScreenProps {
   onBack: () => void
 }
 
 export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white p-4 flex items-center space-x-3 shadow-sm">
         <button onClick={onBack}>
           <ArrowLeft className="text-gray-700" size={24} />
         </button>
-        <h1 className="text-xl font-bold text-gray-800">Privacy & Security</h1>
+        <h1 className="text-xl font-bold text-gray-800">{t.privacySecurityTitle}</h1>
       </div>
 
       <div className="p-4 space-y-4">
         <div className="bg-white rounded-2xl p-4 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase">Account Security</h2>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase">{t.accountSecurity}</h2>
           
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center space-x-3">
               <Lock className="text-primary" size={20} />
               <div>
-                <p className="font-semibold text-gray-800">Change Password</p>
-                <p className="text-xs text-gray-500">Update your password</p>
+                <p className="font-semibold text-gray-800">{t.changePassword}</p>
+                <p className="text-xs text-gray-500">{t.updatePassword}</p>
               </div>
             </div>
-            <button className="text-primary font-semibold text-sm">Change</button>
+            <button className="text-primary font-semibold text-sm">{t.change}</button>
           </div>
 
           <div className="flex items-center justify-between py-2">

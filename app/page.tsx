@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { App as CapacitorApp } from '@capacitor/app'
+import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'
 import LoginScreen from '../components/LoginScreen'
 import OTPScreen from '../components/OTPScreen'
 import LanguageScreen from '../components/LanguageScreen'
@@ -18,7 +19,8 @@ import PrivacySecurityScreen from '../components/PrivacySecurityScreen'
 import VideoCallScreen from '../components/VideoCallScreen'
 import AudioCallScreen from '../components/AudioCallScreen'
 
-export default function Home() {
+function AppContent() {
+  const { setLang } = useLanguage()
   const [currentScreen, setCurrentScreen] = useState('login')
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [callData, setCallData] = useState<{ userName: string; userAvatar: string; rate: number } | null>(null)
@@ -64,7 +66,7 @@ export default function Home() {
       case 'otp':
         return <OTPScreen onNext={() => navigateTo('language')} />
       case 'language':
-        return <LanguageScreen onNext={() => navigateTo('gender')} />
+        return <LanguageScreen onNext={() => navigateTo('gender')} onSelectLanguage={setLang} />
       case 'gender':
         return <GenderScreen onNext={() => navigateTo('userlist')} />
       case 'userlist':
@@ -114,4 +116,12 @@ export default function Home() {
   }
 
   return renderScreen()
+}
+
+export default function Home() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  )
 }

@@ -1,4 +1,6 @@
 import { X, Video, Phone } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface CallConfirmationScreenProps {
   onClose: () => void
@@ -17,6 +19,8 @@ export default function CallConfirmationScreen({
   rate,
   userAvatar 
 }: CallConfirmationScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl w-full max-w-sm p-6 relative">
@@ -38,23 +42,23 @@ export default function CallConfirmationScreen({
               <Phone size={20} className="text-primary" />
             )}
             <span className="text-gray-600">
-              {callType === 'video' ? 'Video Call' : 'Audio Call'}
+              {callType === 'video' ? t.videoCall : t.audioCall}
             </span>
           </div>
 
           <div className="bg-orange-50 rounded-2xl p-4 w-full mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-600">Rate</span>
+              <span className="text-gray-600">{t.rate}</span>
               <span className="text-xl font-bold text-primary">₹{rate}/min</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Your Balance</span>
+              <span className="text-gray-600">{t.yourBalance}</span>
               <span className="text-lg font-semibold text-gray-800">₹250</span>
             </div>
           </div>
 
           <p className="text-sm text-gray-500 text-center mb-6">
-            You will be charged ₹{rate} per minute for this call
+            {lang === 'hi' ? `आपसे ₹${rate} प्रति मिनट शुल्क लिया जाएगा` : `You will be charged ₹${rate} per minute for this call`}
           </p>
 
           <div className="flex gap-3 w-full">
@@ -62,13 +66,13 @@ export default function CallConfirmationScreen({
               onClick={onClose}
               className="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-semibold"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button 
               onClick={onConfirm}
               className="flex-1 py-3 bg-primary text-white rounded-full font-semibold"
             >
-              Start Call
+              {t.startCall}
             </button>
           </div>
         </div>

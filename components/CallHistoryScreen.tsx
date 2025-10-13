@@ -1,8 +1,13 @@
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
+
 interface CallHistoryScreenProps {
   onBack: () => void
 }
 
 export default function CallHistoryScreen({ onBack }: CallHistoryScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -16,7 +21,7 @@ export default function CallHistoryScreen({ onBack }: CallHistoryScreenProps) {
 
       {/* Title */}
       <div className="px-4 pb-6">
-        <h1 className="text-3xl font-bold text-black">Call History</h1>
+        <h1 className="text-3xl font-bold text-black">{t.callHistoryTitle}</h1>
       </div>
 
       {/* Call List */}
@@ -37,10 +42,10 @@ export default function CallHistoryScreen({ onBack }: CallHistoryScreenProps) {
             
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <span className="text-xs text-green-500 font-medium">● online</span>
+                <span className="text-xs text-green-500 font-medium">● {t.online}</span>
               </div>
-              <h3 className="font-semibold text-black text-lg">User Name</h3>
-              <p className="text-sm text-gray-500">Attributes</p>
+              <h3 className="font-semibold text-black text-lg">{t.userName}</h3>
+              <p className="text-sm text-gray-500">{t.attributes}</p>
             </div>
             
             <div className="text-right">

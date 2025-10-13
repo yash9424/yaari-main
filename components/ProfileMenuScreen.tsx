@@ -1,4 +1,6 @@
 import { ChevronLeft, List, Phone, Shield, Headphones, LogOut, User, Edit2 } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface ProfileMenuScreenProps {
   onBack: () => void
@@ -10,12 +12,15 @@ interface ProfileMenuScreenProps {
 }
 
 export default function ProfileMenuScreen({ onBack, onCallHistory, onTransactionHistory, onCustomerSupport, onEditProfile, onPrivacySecurity }: ProfileMenuScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
+  
   const menuItems = [
-    { icon: List, label: 'Transaction History', bgColor: 'bg-orange-50' },
-    { icon: Phone, label: 'Call History', bgColor: 'bg-orange-50' },
-    { icon: Shield, label: 'Privacy & Security', bgColor: 'bg-orange-50' },
-    { icon: Headphones, label: 'Customer Support', bgColor: 'bg-orange-50' },
-    { icon: LogOut, label: 'Log Out', bgColor: 'bg-orange-50' },
+    { icon: List, label: t.transactionHistory, key: 'transaction', bgColor: 'bg-orange-50' },
+    { icon: Phone, label: t.callHistory, key: 'call', bgColor: 'bg-orange-50' },
+    { icon: Shield, label: t.privacySecurity, key: 'privacy', bgColor: 'bg-orange-50' },
+    { icon: Headphones, label: t.customerSupport, key: 'support', bgColor: 'bg-orange-50' },
+    { icon: LogOut, label: t.logOut, key: 'logout', bgColor: 'bg-orange-50' },
   ]
 
   return (
@@ -43,10 +48,10 @@ export default function ProfileMenuScreen({ onBack, onCallHistory, onTransaction
             <button
               key={index}
               onClick={
-                item.label === 'Call History' ? onCallHistory :
-                item.label === 'Transaction History' ? onTransactionHistory :
-                item.label === 'Customer Support' ? onCustomerSupport :
-                item.label === 'Privacy & Security' ? onPrivacySecurity :
+                item.key === 'call' ? onCallHistory :
+                item.key === 'transaction' ? onTransactionHistory :
+                item.key === 'support' ? onCustomerSupport :
+                item.key === 'privacy' ? onPrivacySecurity :
                 undefined
               }
               className={`w-full flex items-center space-x-4 p-4 ${item.bgColor} rounded-2xl transition-colors hover:bg-orange-100`}

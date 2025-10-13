@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface GenderScreenProps {
   onNext: () => void
 }
 
 export default function GenderScreen({ onNext }: GenderScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   const [selectedGender, setSelectedGender] = useState('female')
 
   return (
@@ -14,7 +18,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
         <ChevronLeft size={24} className="text-gray-800" />
       </button>
       
-      <h2 className="text-2xl font-semibold text-gray-800 mb-8">Gender</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-8">{t.selectGender}</h2>
       
       <div className="flex-1 flex flex-col">
         <div className="flex justify-center space-x-4 mb-auto">
@@ -26,7 +30,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
                 : 'border-gray-200 text-gray-700 bg-white'
             }`}
           >
-            Male
+            {t.male}
           </button>
           
           <button
@@ -37,7 +41,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
                 : 'border-gray-200 text-gray-700 bg-white'
             }`}
           >
-            Female
+            {t.female}
           </button>
         </div>
         
@@ -45,7 +49,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
           onClick={onNext}
           className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8"
         >
-          Next
+          {t.next}
         </button>
       </div>
     </div>

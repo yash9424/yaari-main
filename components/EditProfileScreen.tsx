@@ -1,11 +1,15 @@
 import { User, Plus, X } from 'lucide-react'
 import { useState } from 'react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface EditProfileScreenProps {
   onBack: () => void
 }
 
 export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   const [userName, setUserName] = useState('User Name')
   const [phoneNumber, setPhoneNumber] = useState('+91 9879879877')
   const [aboutMe, setAboutMe] = useState('')
@@ -35,7 +39,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
 
       {/* Title */}
       <div className="px-4 pb-6">
-        <h1 className="text-3xl font-bold text-black">Edit Profile</h1>
+        <h1 className="text-3xl font-bold text-black">{t.editProfile}</h1>
       </div>
 
       {/* Profile Picture Section */}
@@ -44,7 +48,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User1" alt="Profile" className="w-full h-full object-cover" />
         </div>
         <button className="px-6 py-3 border-2 border-primary text-primary rounded-full font-semibold">
-          Upload Picture
+          {t.uploadPicture}
         </button>
       </div>
 
@@ -69,7 +73,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
         />
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">About Me</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t.aboutMe}</label>
           <textarea
             value={aboutMe}
             onChange={(e) => setAboutMe(e.target.value)}
@@ -81,7 +85,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Photo Gallery</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t.photoGallery}</label>
           <div className="grid grid-cols-3 gap-2">
             {images.map((img, i) => (
               <div key={i} className="aspect-square bg-gray-200 rounded-lg relative overflow-hidden">
@@ -97,7 +101,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Hobbies</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t.hobbies}</label>
           <div className="flex flex-wrap gap-2 mb-3">
             {hobbies.map((hobby, i) => (
               <span key={i} className="bg-orange-50 text-gray-800 px-4 py-2 rounded-full text-sm border border-gray-200 flex items-center gap-2">
@@ -119,7 +123,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
               style={{ fontSize: '16px' }}
             />
             <button onClick={addHobby} className="px-4 py-3 bg-primary text-white rounded-full font-semibold text-sm whitespace-nowrap">
-              Add
+              {t.add}
             </button>
           </div>
         </div>
@@ -128,7 +132,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
       {/* Save Button */}
       <div className="fixed bottom-8 left-4 right-4">
         <button className="w-full bg-primary text-white py-4 rounded-full font-semibold text-lg">
-          Save Changes
+          {t.saveChanges}
         </button>
       </div>
     </div>

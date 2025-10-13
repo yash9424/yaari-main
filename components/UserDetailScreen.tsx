@@ -64,7 +64,7 @@ export default function UserDetailScreen({ onBack, userId, onStartCall }: UserDe
         <div className="flex space-x-3">
           <button 
             onClick={() => onStartCall({ userName, userAvatar, rate: 10, type: 'video' })}
-            className="flex-1 bg-primary text-white py-4 rounded-full font-semibold flex items-center justify-center gap-2"
+              className="flex-1 bg-primary text-white py-4 rounded-full font-semibold flex items-center justify-center gap-2"
           >
             <Phone size={18} />
             <span>₹10/min</span>
