@@ -1,0 +1,67 @@
+import { useState } from 'react'
+
+interface LoginScreenProps {
+  onNext: () => void
+}
+
+export default function LoginScreen({ onNext }: LoginScreenProps) {
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^0-9]/g, '')
+    if (value.startsWith('91')) {
+      value = value.slice(2)
+    }
+    if (value.length <= 10) {
+      setPhoneNumber(value)
+    }
+  }
+
+  const displayPhone = phoneNumber ? `+91 ${phoneNumber}` : '+91 '
+
+  return (
+    <div className="min-h-screen flex flex-col relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/images/loginScreenBackgroundImage.png)' }}
+      />
+      
+      <div 
+        className={`absolute left-0 right-0 bg-white rounded-t-3xl p-8 shadow-lg transition-all duration-300 z-10 ${
+          isFocused ? 'bottom-0' : 'bottom-0'
+        }`}
+        style={{
+          paddingBottom: isFocused ? 'env(safe-area-inset-bottom, 20px)' : '32px'
+        }}
+      >
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-primary mb-2">Yaari</h1>
+          <p className="text-gray-600 text-sm">Connect with real people</p>
+        </div>
+        
+        <div className="mb-4">
+          <input
+            type="tel"
+            inputMode="numeric"
+            placeholder="Enter your Phone Number"
+            value={displayPhone}
+            onChange={handlePhoneChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            className="w-full p-4 border border-gray-300 rounded-full text-base focus:outline-none focus:border-primary bg-gray-50"
+          />
+        </div>
+        
+        <button 
+          onClick={onNext}
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mb-3"
+        >
+          Get OTP
+        </button>
+        
+        <p className="text-center text-xs text-primary">Terms & Condition</p>
+      </div>
+    </div>
+  )
+}
