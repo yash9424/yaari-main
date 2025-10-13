@@ -13,10 +13,13 @@
     "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "lucide-react": "^0.292.0"
+    "lucide-react": "^0.292.0",
+    "@capacitor/core": "^5.5.0",
+    "@capacitor/android": "^5.5.0",
+    "@capacitor/app": "^5.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^5.5.0",
+    "@capacitor/cli": "^5.7.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -28,8 +31,6 @@
     "typescript": "^5"
   },
   "optionalDependencies": {
-    "@capacitor/android": "^5.5.0",
-    "@capacitor/ios": "^5.5.0",
-    "@capacitor/core": "^5.5.0"
+    "@capacitor/ios": "^5.5.0"
   }
 }

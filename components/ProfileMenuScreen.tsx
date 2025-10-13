@@ -6,9 +6,10 @@ interface ProfileMenuScreenProps {
   onTransactionHistory: () => void
   onCustomerSupport: () => void
   onEditProfile: () => void
+  onPrivacySecurity: () => void
 }
 
-export default function ProfileMenuScreen({ onBack, onCallHistory, onTransactionHistory, onCustomerSupport, onEditProfile }: ProfileMenuScreenProps) {
+export default function ProfileMenuScreen({ onBack, onCallHistory, onTransactionHistory, onCustomerSupport, onEditProfile, onPrivacySecurity }: ProfileMenuScreenProps) {
   const menuItems = [
     { icon: List, label: 'Transaction History', bgColor: 'bg-orange-50' },
     { icon: Phone, label: 'Call History', bgColor: 'bg-orange-50' },
@@ -45,6 +46,7 @@ export default function ProfileMenuScreen({ onBack, onCallHistory, onTransaction
                 item.label === 'Call History' ? onCallHistory :
                 item.label === 'Transaction History' ? onTransactionHistory :
                 item.label === 'Customer Support' ? onCustomerSupport :
+                item.label === 'Privacy & Security' ? onPrivacySecurity :
                 undefined
               }
               className={`w-full flex items-center space-x-4 p-4 ${item.bgColor} rounded-2xl transition-colors hover:bg-orange-100`}

@@ -1,4 +1,4 @@
-import { Heart, User as UserIcon } from 'lucide-react'
+import { Heart, User as UserIcon, Video, Phone } from 'lucide-react'
 import Image from 'next/image'
 
 interface UserListScreenProps {
@@ -53,38 +53,37 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
       </div>
 
       <div className="p-4">
-        <div className="bg-orange-100 rounded-2xl h-40 mb-4"></div>
+        <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl h-40 mb-4"></div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {users.map((user) => (
             <div 
               key={user.id} 
               onClick={() => onUserClick(user.id)}
-              className="bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm cursor-pointer active:bg-gray-50"
+              className="bg-white rounded-2xl p-4 flex items-center space-x-4 shadow-sm cursor-pointer active:bg-gray-50"
             >
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=User${user.id}`} alt="User" className="w-full h-full object-cover" />
-                  </div>
-                  <div className={`absolute bottom-0 right-0 w-4 h-4 ${user.statusColor} rounded-full border-2 border-white flex items-center justify-center`}>
-                    {user.status === 'online' && (
-                      <span className="text-white text-xs font-bold">✓</span>
-                    )}
-                  </div>
+              <div className="relative flex-shrink-0">
+                <div className="w-24 h-24 bg-gray-300 rounded-full overflow-hidden">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=User${user.id}`} alt="User" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h3 className="text-primary font-semibold text-base">{user.name}</h3>
-                  <p className="text-gray-600 text-sm">{user.attributes}</p>
+                <div className={`absolute bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 ${user.statusColor} rounded-full text-white text-xs font-medium flex items-center space-x-1`}>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                  <span className="capitalize">{user.status}</span>
                 </div>
               </div>
-              <div className="flex flex-col space-y-2">
-                <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
-                  <span>₹10/min</span>
-                </button>
-                <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
-                  <span>₹5/min</span>
-                </button>
+              <div className="flex-1">
+                <h3 className="text-primary font-bold text-lg mb-0.5">{user.name}</h3>
+                <p className="text-gray-500 text-sm mb-3">{user.attributes}</p>
+                <div className="flex space-x-2">
+                  <button className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none">
+                    <Video size={14} fill="white" strokeWidth={0} className="flex-shrink-0" />
+                    <span className="pt-0.5">₹10/min</span>
+                  </button>
+                  <button className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none">
+                    <Phone size={14} strokeWidth={2} className="flex-shrink-0" />
+                    <span className="pt-0.5">₹5/min</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}

@@ -15,6 +15,15 @@
     "Keyboard": {
       "resize": "native",
       "style": "dark"
+    },
+    "StatusBar": {
+      "style": "light",
+      "backgroundColor": "#FF6B35"
     }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
   }
 }

@@ -16,6 +16,7 @@ export const metadata = {
     maximumScale: 1,
     userScalable: false,
     viewportFit: 'cover',
+    interactiveWidget: 'resizes-content',
   },
   themeColor: '#FF6B35',
   appleWebApp: {
@@ -35,7 +36,8 @@ export default function RootLayout({
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#FF6B35" />
       </head>
       <body className={balooTammudu.className}>
         <div className="mobile-container">
