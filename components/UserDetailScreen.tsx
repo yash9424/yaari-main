@@ -3,9 +3,12 @@ import { ArrowLeft, Phone } from 'lucide-react'
 interface UserDetailScreenProps {
   onBack: () => void
   userId: number
+  onStartCall: (data: { userName: string; userAvatar: string; rate: number; type: 'video' | 'audio' }) => void
 }
 
-export default function UserDetailScreen({ onBack, userId }: UserDetailScreenProps) {
+export default function UserDetailScreen({ onBack, userId, onStartCall }: UserDetailScreenProps) {
+  const userName = 'User Name'
+  const userAvatar = `https://api.dicebear.com/7.x/big-smile/svg?seed=User${userId}`
   return (
     <div className="min-h-screen bg-white">
       <div className="p-4">
@@ -59,11 +62,17 @@ export default function UserDetailScreen({ onBack, userId }: UserDetailScreenPro
 
       <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg">
         <div className="flex space-x-3">
-          <button className="flex-1 bg-primary text-white py-3 rounded-full font-semibold flex items-center justify-center space-x-2">
+          <button 
+            onClick={() => onStartCall({ userName, userAvatar, rate: 10, type: 'video' })}
+            className="flex-1 bg-primary text-white py-4 rounded-full font-semibold flex items-center justify-center gap-2"
+          >
             <Phone size={18} />
             <span>₹10/min</span>
           </button>
-          <button className="flex-1 bg-primary text-white py-3 rounded-full font-semibold flex items-center justify-center space-x-2">
+          <button 
+            onClick={() => onStartCall({ userName, userAvatar, rate: 5, type: 'audio' })}
+            className="flex-1 bg-primary text-white py-4 rounded-full font-semibold flex items-center justify-center gap-2"
+          >
             <Phone size={18} />
             <span>₹5/min</span>
           </button>

@@ -15,10 +15,13 @@ import TransactionHistoryScreen from '../components/TransactionHistoryScreen'
 import CustomerSupportScreen from '../components/CustomerSupportScreen'
 import EditProfileScreen from '../components/EditProfileScreen'
 import PrivacySecurityScreen from '../components/PrivacySecurityScreen'
+import VideoCallScreen from '../components/VideoCallScreen'
+import AudioCallScreen from '../components/AudioCallScreen'
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState('login')
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
+  const [callData, setCallData] = useState<{ userName: string; userAvatar: string; rate: number } | null>(null)
   const [screenHistory, setScreenHistory] = useState<string[]>(['login'])
 
   useEffect(() => {
@@ -65,9 +68,19 @@ export default function Home() {
       case 'gender':
         return <GenderScreen onNext={() => navigateTo('userlist')} />
       case 'userlist':
-        return <UserListScreen onNext={() => navigateTo('dashboard')} onProfileClick={() => navigateTo('profile')} onCoinClick={() => navigateTo('coins')} onUserClick={(id) => { setSelectedUserId(id); navigateTo('userdetail'); }} />
+        return <UserListScreen 
+          onNext={() => navigateTo('dashboard')} 
+          onProfileClick={() => navigateTo('profile')} 
+          onCoinClick={() => navigateTo('coins')} 
+          onUserClick={(id) => { setSelectedUserId(id); navigateTo('userdetail'); }}
+          onStartCall={(data) => { setCallData(data); navigateTo(data.type === 'video' ? 'videocall' : 'audiocall'); }}
+        />
       case 'userdetail':
-        return <UserDetailScreen userId={selectedUserId!} onBack={navigateBack} />
+        return <UserDetailScreen 
+          userId={selectedUserId!} 
+          onBack={navigateBack}
+          onStartCall={(data) => { setCallData(data); navigateTo(data.type === 'video' ? 'videocall' : 'audiocall'); }}
+        />
       case 'profile':
         return <ProfileMenuScreen 
           onBack={navigateBack}
@@ -89,6 +102,10 @@ export default function Home() {
         return <PrivacySecurityScreen onBack={navigateBack} />
       case 'coins':
         return <CoinPurchaseScreen onBack={navigateBack} />
+      case 'videocall':
+        return callData ? <VideoCallScreen onEnd={navigateBack} userName={callData.userName} userAvatar={callData.userAvatar} rate={callData.rate} /> : <LoginScreen onNext={() => navigateTo('otp')} />
+      case 'audiocall':
+        return callData ? <AudioCallScreen onEnd={navigateBack} userName={callData.userName} userAvatar={callData.userAvatar} rate={callData.rate} /> : <LoginScreen onNext={() => navigateTo('otp')} />
       case 'dashboard':
         return <DashboardScreen />
       default:

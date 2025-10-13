@@ -1,11 +1,14 @@
 import { Heart, User as UserIcon, Video, Phone } from 'lucide-react'
 import Image from 'next/image'
+import { useState } from 'react'
+import CallConfirmationScreen from './CallConfirmationScreen'
 
 interface UserListScreenProps {
   onNext: () => void
   onProfileClick: () => void
   onCoinClick: () => void
   onUserClick: (userId: number) => void
+  onStartCall: (data: { userName: string; userAvatar: string; rate: number; type: 'video' | 'audio' }) => void
 }
 
 interface User {
@@ -16,13 +19,34 @@ interface User {
   statusColor: string
 }
 
-export default function UserListScreen({ onNext, onProfileClick, onCoinClick, onUserClick }: UserListScreenProps) {
+export default function UserListScreen({ onNext, onProfileClick, onCoinClick, onUserClick, onStartCall }: UserListScreenProps) {
+  const [showCallModal, setShowCallModal] = useState(false)
+  const [selectedCall, setSelectedCall] = useState<{ user: User; type: 'video' | 'audio'; rate: number } | null>(null)
+
   const users: User[] = [
     { id: 1, name: 'User Name', attributes: 'Attributes', status: 'online', statusColor: 'bg-green-500' },
     { id: 2, name: 'User Name', attributes: 'Attributes', status: 'online', statusColor: 'bg-green-500' },
     { id: 3, name: 'User Name', attributes: 'Attributes', status: 'busy', statusColor: 'bg-red-500' },
     { id: 4, name: 'User Name', attributes: 'Attributes', status: 'offline', statusColor: 'bg-gray-400' },
   ]
+
+  const handleCallClick = (user: User, type: 'video' | 'audio', rate: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedCall({ user, type, rate })
+    setShowCallModal(true)
+  }
+
+  const handleConfirmCall = () => {
+    if (selectedCall) {
+      setShowCallModal(false)
+      onStartCall({
+        userName: selectedCall.user.name,
+        userAvatar: `https://api.dicebear.com/7.x/big-smile/svg?seed=User${selectedCall.user.id}`,
+        rate: selectedCall.rate,
+        type: selectedCall.type
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,11 +99,17 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
                 <h3 className="text-primary font-bold text-lg mb-0.5">{user.name}</h3>
                 <p className="text-gray-500 text-sm mb-3">{user.attributes}</p>
                 <div className="flex space-x-2">
-                  <button className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none">
+                  <button 
+                    onClick={(e) => handleCallClick(user, 'video', 10, e)}
+                    className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none"
+                  >
                     <Video size={14} fill="white" strokeWidth={0} className="flex-shrink-0" />
                     <span className="pt-0.5">₹10/min</span>
                   </button>
-                  <button className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none">
+                  <button 
+                    onClick={(e) => handleCallClick(user, 'audio', 5, e)}
+                    className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none"
+                  >
                     <Phone size={14} strokeWidth={2} className="flex-shrink-0" />
                     <span className="pt-0.5">₹5/min</span>
                   </button>
@@ -89,6 +119,17 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
           ))}
         </div>
       </div>
+
+      {showCallModal && selectedCall && (
+        <CallConfirmationScreen
+          onClose={() => setShowCallModal(false)}
+          onConfirm={handleConfirmCall}
+          userName={selectedCall.user.name}
+          callType={selectedCall.type}
+          rate={selectedCall.rate}
+          userAvatar={`https://api.dicebear.com/7.x/big-smile/svg?seed=User${selectedCall.user.id}`}
+        />
+      )}
     </div>
   )
 }

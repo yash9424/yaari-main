@@ -118,7 +118,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
               className="flex-1 p-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-primary bg-gray-50"
               style={{ fontSize: '16px' }}
             />
-            <button onClick={addHobby} className="px-6 py-3 bg-primary text-white rounded-full font-semibold">
+            <button onClick={addHobby} className="px-4 py-3 bg-primary text-white rounded-full font-semibold text-sm whitespace-nowrap">
               Add
             </button>
           </div>
