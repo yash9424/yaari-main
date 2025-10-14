@@ -1,4 +1,6 @@
 import { ArrowLeft, Phone } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
 
 interface UserDetailScreenProps {
   onBack: () => void
@@ -7,7 +9,9 @@ interface UserDetailScreenProps {
 }
 
 export default function UserDetailScreen({ onBack, userId, onStartCall }: UserDetailScreenProps) {
-  const userName = 'User Name'
+  const { lang } = useLanguage()
+  const t = translations[lang]
+  const userName = t.userName
   const userAvatar = `https://api.dicebear.com/7.x/big-smile/svg?seed=User${userId}`
   return (
     <div className="min-h-screen bg-white">
@@ -25,22 +29,22 @@ export default function UserDetailScreen({ onBack, userId, onStartCall }: UserDe
             </div>
             <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full flex items-center space-x-1">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-xs font-medium text-green-500">Online</span>
+              <span className="text-xs font-medium text-green-500">{t.online}</span>
             </div>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">User Name</h2>
-          <p className="text-sm text-gray-600">Attributes</p>
+          <h2 className="text-xl font-bold text-gray-900">{t.userName}</h2>
+          <p className="text-sm text-gray-600">{t.attributes}</p>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-primary font-semibold text-lg mb-2">About Me</h3>
+          <h3 className="text-primary font-semibold text-lg mb-2">{t.aboutMe}</h3>
           <p className="text-gray-700 text-sm leading-relaxed">
             Porem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur tempus urna at turpis condimentum lobortis.
           </p>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-primary font-semibold text-lg mb-3">Photo gallery</h3>
+          <h3 className="text-primary font-semibold text-lg mb-3">{t.photoGallery}</h3>
           <div className="grid grid-cols-3 gap-2">
             {[...Array(9)].map((_, i) => (
               <div key={i} className="aspect-square bg-gray-300 rounded-lg"></div>
@@ -49,13 +53,13 @@ export default function UserDetailScreen({ onBack, userId, onStartCall }: UserDe
         </div>
 
         <div className="mb-6">
-          <h3 className="text-primary font-semibold text-lg mb-3">Hobbies</h3>
+          <h3 className="text-primary font-semibold text-lg mb-3">{t.hobbies}</h3>
           <div className="flex flex-wrap gap-2">
-            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">Hobby 01</span>
-            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">Hobby 01</span>
-            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">Hobby 01</span>
-            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">Hobby 01</span>
-            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">Hobby 01</span>
+            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">{t.hobby} 01</span>
+            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">{t.hobby} 02</span>
+            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">{t.hobby} 03</span>
+            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">{t.hobby} 04</span>
+            <span className="bg-orange-50 text-gray-800 px-4 py-2 rounded-lg text-sm border border-gray-200">{t.hobby} 05</span>
           </div>
         </div>
       </div>

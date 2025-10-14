@@ -1,8 +1,13 @@
+import { useLanguage } from '../contexts/LanguageContext'
+import { translations } from '../utils/translations'
+
 interface TransactionHistoryScreenProps {
   onBack: () => void
 }
 
 export default function TransactionHistoryScreen({ onBack }: TransactionHistoryScreenProps) {
+  const { lang } = useLanguage()
+  const t = translations[lang]
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -14,29 +19,21 @@ export default function TransactionHistoryScreen({ onBack }: TransactionHistoryS
 
       {/* Title */}
       <div className="px-4 pb-6">
-        <h1 className="text-3xl font-bold text-black">Transaction History</h1>
+        <h1 className="text-3xl font-bold text-black">{t.transactionHistory}</h1>
       </div>
 
       {/* Content */}
       <div className="flex flex-col items-center justify-center px-8 mt-20">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Need help</h2>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">understanding</h2>
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">
-            your <span className="font-bold">transactions?</span>
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{t.needHelp}</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{t.understanding}</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">{t.yourTransactions}</h2>
           
-          <p className="text-gray-600 text-base leading-relaxed mb-2">
-            If you have any questions or spot
-          </p>
-          <p className="text-gray-600 text-base leading-relaxed mb-2">
-            something unusual, please reach
-          </p>
-          <p className="text-gray-600 text-base leading-relaxed mb-2">
-            out to us at <span className="text-primary font-medium">support@yaari.me</span>
+          <p className="text-gray-600 text-base leading-relaxed mb-4">
+            {t.questionsText} <span className="text-primary font-medium">support@yaari.me</span>
           </p>
           <p className="text-gray-600 text-base leading-relaxed">
-            Our team is here to assist you.
+            {t.ourTeam}
           </p>
         </div>
       </div>

@@ -37,8 +37,8 @@ export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenP
             <div className="flex items-center space-x-3">
               <Shield className="text-primary" size={20} />
               <div>
-                <p className="font-semibold text-gray-800">Two-Factor Authentication</p>
-                <p className="text-xs text-gray-500">Add extra security</p>
+                <p className="font-semibold text-gray-800">{t.twoFactorAuth}</p>
+                <p className="text-xs text-gray-500">{t.addExtraSecurity}</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -49,14 +49,14 @@ export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenP
         </div>
 
         <div className="bg-white rounded-2xl p-4 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase">Privacy Settings</h2>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase">{t.privacySettings}</h2>
           
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center space-x-3">
               <Eye className="text-primary" size={20} />
               <div>
-                <p className="font-semibold text-gray-800">Profile Visibility</p>
-                <p className="text-xs text-gray-500">Who can see your profile</p>
+                <p className="font-semibold text-gray-800">{t.profileVisibility}</p>
+                <p className="text-xs text-gray-500">{t.whoCanSee}</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -69,8 +69,8 @@ export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenP
             <div className="flex items-center space-x-3">
               <Bell className="text-primary" size={20} />
               <div>
-                <p className="font-semibold text-gray-800">Show Online Status</p>
-                <p className="text-xs text-gray-500">Let others see when you're online</p>
+                <p className="font-semibold text-gray-800">{t.showOnlineStatus}</p>
+                <p className="text-xs text-gray-500">{t.letOthersSee}</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -83,21 +83,21 @@ export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenP
             <div className="flex items-center space-x-3">
               <UserX className="text-primary" size={20} />
               <div>
-                <p className="font-semibold text-gray-800">Blocked Users</p>
-                <p className="text-xs text-gray-500">Manage blocked contacts</p>
+                <p className="font-semibold text-gray-800">{t.blockedUsers}</p>
+                <p className="text-xs text-gray-500">{t.manageBlocked}</p>
               </div>
             </div>
-            <button className="text-primary font-semibold text-sm">View</button>
+            <button className="text-primary font-semibold text-sm">{t.view}</button>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase">Data & Privacy</h2>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase">{t.dataPrivacy}</h2>
           
           <button className="flex items-center justify-between py-2 w-full">
             <div className="flex items-center space-x-3">
               <Shield className="text-primary" size={20} />
-              <p className="font-semibold text-gray-800">Privacy Policy</p>
+              <p className="font-semibold text-gray-800">{t.privacyPolicy}</p>
             </div>
             <span className="text-gray-400">›</span>
           </button>
@@ -105,7 +105,7 @@ export default function PrivacySecurityScreen({ onBack }: PrivacySecurityScreenP
           <button className="flex items-center justify-between py-2 w-full">
             <div className="flex items-center space-x-3">
               <Lock className="text-primary" size={20} />
-              <p className="font-semibold text-gray-800">Terms of Service</p>
+              <p className="font-semibold text-gray-800">{t.termsOfService}</p>
             </div>
             <span className="text-gray-400">›</span>
           </button>
