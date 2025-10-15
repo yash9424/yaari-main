@@ -84,3 +84,19 @@ input:focus {
 .border-3 {
   border-width: 3px;
 }
+
+/* GLOBAL FIX: Vertical text alignment for Capacitor Android WebView */
+button {
+  line-height: 1 !important;
+}
+
+input,
+textarea,
+select {
+  line-height: 1.5 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  line-height: 1.5 !important;
+}

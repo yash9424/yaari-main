@@ -103,13 +103,14 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
         <div className="flex items-center space-x-3">
           <button 
             onClick={onCoinClick}
-            className="flex items-center space-x-2 bg-orange-400 px-3 py-2 rounded-full"
+            className="bg-orange-400 px-3 h-9 rounded-full flex items-center justify-center gap-1.5"
           >
             <Image 
               src="/images/bitcoin-icons_transactions-outline.svg" 
               alt="coins" 
-              width={20} 
-              height={20}
+              width={18} 
+              height={18}
+              className="mt-0.5"
             />
             <span className="text-white font-bold text-sm">₹{balance}</span>
           </button>
@@ -157,20 +158,18 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
               <div className="flex-1">
                 <h3 className="text-primary font-bold text-lg mb-0.5">{user.name}</h3>
                 <p className="text-gray-500 text-sm mb-3">{user.attributes}</p>
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <button 
                     onClick={(e) => handleCallClick(user, 'video', 10, e)}
-                    className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none"
+                    className="flex-1 bg-primary text-white py-2 rounded-full flex items-center justify-center"
                   >
-                    <Video size={14} fill="white" strokeWidth={0} className="flex-shrink-0" />
-                    <span className="pt-0.5">₹10/min</span>
+                    <Video size={16} fill="white" strokeWidth={0} />
                   </button>
                   <button 
                     onClick={(e) => handleCallClick(user, 'audio', 5, e)}
-                    className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-1.5 leading-none"
+                    className="flex-1 bg-primary text-white py-2 rounded-full flex items-center justify-center"
                   >
-                    <Phone size={14} strokeWidth={2} className="flex-shrink-0" />
-                    <span className="pt-0.5">₹5/min</span>
+                    <Phone size={16} strokeWidth={2} />
                   </button>
                 </div>
               </div>
