@@ -96,23 +96,22 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white p-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-2">
-          <Heart className="text-primary" size={24} fill="#FF6B35" />
-          <h1 className="text-2xl font-bold text-primary">Yaari</h1>
+        <div className="flex items-center gap-2" style={{ alignItems: 'center' }}>
+          <Heart className="text-primary" size={24} fill="#FF6B35" style={{ marginTop: '4px' }} />
+          <h1 className="text-2xl font-bold text-primary" style={{ lineHeight: '24px' }}>Yaari</h1>
         </div>
         <div className="flex items-center space-x-3">
           <button 
             onClick={onCoinClick}
-            className="bg-orange-400 px-3 h-9 rounded-full flex items-center justify-center gap-1.5"
+            className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg"
+            style={{ alignItems: 'center' }}
           >
-            <Image 
-              src="/images/bitcoin-icons_transactions-outline.svg" 
-              alt="coins" 
-              width={18} 
-              height={18}
-              className="mt-0.5"
-            />
-            <span className="text-white font-bold text-sm">₹{balance}</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-700" style={{ marginTop: '2px' }}>
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+            </svg>
+            <span className="text-gray-800 font-bold text-base" style={{ lineHeight: '20px' }}>₹{balance}</span>
           </button>
           <button 
             onClick={onProfileClick}
@@ -162,12 +161,14 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
                   <button 
                     onClick={(e) => handleCallClick(user, 'video', 10, e)}
                     className="flex-1 bg-primary text-white py-2 rounded-full flex items-center justify-center"
+                    style={{ alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Video size={16} fill="white" strokeWidth={0} />
                   </button>
                   <button 
                     onClick={(e) => handleCallClick(user, 'audio', 5, e)}
                     className="flex-1 bg-primary text-white py-2 rounded-full flex items-center justify-center"
+                    style={{ alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Phone size={16} strokeWidth={2} />
                   </button>

@@ -85,18 +85,11 @@ input:focus {
   border-width: 3px;
 }
 
-/* GLOBAL FIX: Vertical text alignment for Capacitor Android WebView */
-button {
-  line-height: 1 !important;
+/* SIMPLE FIX: Icon alignment for Android WebView */
+svg {
+  vertical-align: middle;
 }
 
-input,
-textarea,
-select {
-  line-height: 1.5 !important;
-}
-
-input::placeholder,
-textarea::placeholder {
-  line-height: 1.5 !important;
+img {
+  vertical-align: middle;
 }
