@@ -75,7 +75,7 @@ export default function CoinPurchaseScreen({ onBack }: CoinPurchaseScreenProps) 
           {coinPackages.map((pkg, index) => (
             <button
               key={index}
-              className="bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors"
+              className="bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center"
             >
               <div className="flex items-center justify-center mb-2">
                 <Image 
@@ -95,7 +95,7 @@ export default function CoinPurchaseScreen({ onBack }: CoinPurchaseScreenProps) 
           ))}
         </div>
 
-        <button className="w-full bg-orange-500 text-white py-4 rounded-2xl font-semibold text-base hover:bg-orange-600 transition-colors">
+        <button className="w-full bg-orange-500 text-white py-4 rounded-2xl font-semibold text-base hover:bg-orange-600 transition-colors flex items-center justify-center">
           Proceed to Payment
         </button>
       </div>

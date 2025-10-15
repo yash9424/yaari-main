@@ -84,7 +84,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
             }
           }}
         />
-        <label htmlFor="profilePic" className="px-6 py-3 border-2 border-primary text-primary rounded-full font-semibold cursor-pointer">
+        <label htmlFor="profilePic" className="px-6 py-3 border-2 border-primary text-primary rounded-full font-semibold cursor-pointer flex items-center justify-center">
           {t.uploadPicture}
         </label>
       </div>
@@ -187,7 +187,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
               className="flex-1 p-3 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-primary bg-gray-50"
               style={{ fontSize: '16px' }}
             />
-            <button onClick={addHobby} className="px-4 py-3 bg-primary text-white rounded-full font-semibold text-sm whitespace-nowrap">
+            <button onClick={addHobby} className="px-4 py-3 bg-primary text-white rounded-full font-semibold text-sm whitespace-nowrap flex items-center justify-center">
               {t.add}
             </button>
           </div>
@@ -242,7 +242,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
             }
           }}
           disabled={loading}
-          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-lg disabled:opacity-50"
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-lg disabled:opacity-50 flex items-center justify-center"
         >
           {loading ? 'Saving...' : t.saveChanges}
         </button>

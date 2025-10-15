@@ -85,7 +85,7 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
         <button 
           onClick={handleSendOTP}
           disabled={loading}
-          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mb-3 disabled:opacity-50"
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mb-3 disabled:opacity-50 flex items-center justify-center"
         >
           {loading ? 'Sending...' : 'Get OTP'}
         </button>

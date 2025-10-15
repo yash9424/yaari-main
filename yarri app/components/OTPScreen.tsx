@@ -104,7 +104,7 @@ export default function OTPScreen({ onNext }: OTPScreenProps) {
         <button 
           onClick={handleVerifyOTP}
           disabled={isVerifying || isVerified}
-          className="w-full bg-primary text-white py-3.5 rounded-xl font-semibold text-base mb-3 flex items-center justify-center relative overflow-hidden"
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mb-3 flex items-center justify-center relative overflow-hidden"
         >
           {isVerifying && (
             <div className="absolute inset-0 flex items-center justify-center">

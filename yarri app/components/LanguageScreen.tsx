@@ -31,7 +31,7 @@ export default function LanguageScreen({ onNext, onSelectLanguage }: LanguageScr
             <button
               key={language.value}
               onClick={() => setSelectedLanguage(language.value)}
-              className={`w-full p-4 rounded-full border-2 transition-colors text-base ${
+              className={`w-full p-4 rounded-full border-2 transition-colors text-base flex items-center justify-center ${
                 selectedLanguage === language.value
                   ? 'border-primary text-primary bg-orange-50'
                   : 'border-gray-200 text-gray-700 bg-white'
@@ -44,7 +44,7 @@ export default function LanguageScreen({ onNext, onSelectLanguage }: LanguageScr
         
         <button 
           onClick={handleNext}
-          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8"
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8 flex items-center justify-center"
         >
           Next
         </button>

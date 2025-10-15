@@ -50,7 +50,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
         <div className="flex justify-center space-x-4 mb-auto">
           <button
             onClick={() => setSelectedGender('male')}
-            className={`px-8 py-3 rounded-full border-2 transition-colors text-base ${
+            className={`px-8 py-3 rounded-full border-2 transition-colors text-base flex items-center justify-center ${
               selectedGender === 'male'
                 ? 'border-primary text-primary bg-orange-50'
                 : 'border-gray-200 text-gray-700 bg-white'
@@ -61,7 +61,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
           
           <button
             onClick={() => setSelectedGender('female')}
-            className={`px-8 py-3 rounded-full border-2 transition-colors text-base ${
+            className={`px-8 py-3 rounded-full border-2 transition-colors text-base flex items-center justify-center ${
               selectedGender === 'female'
                 ? 'border-primary text-primary bg-orange-50'
                 : 'border-gray-200 text-gray-700 bg-white'
@@ -74,7 +74,7 @@ export default function GenderScreen({ onNext }: GenderScreenProps) {
         <button 
           onClick={handleNext}
           disabled={loading}
-          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8 disabled:opacity-50"
+          className="w-full bg-primary text-white py-4 rounded-full font-semibold text-base mt-8 disabled:opacity-50 flex items-center justify-center"
         >
           {loading ? 'Saving...' : t.next}
         </button>

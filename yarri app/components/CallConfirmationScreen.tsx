@@ -64,13 +64,13 @@ export default function CallConfirmationScreen({
           <div className="flex gap-3 w-full">
             <button 
               onClick={onClose}
-              className="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-semibold"
+              className="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-semibold flex items-center justify-center"
             >
               {t.cancel}
             </button>
             <button 
               onClick={onConfirm}
-              className="flex-1 py-3 bg-primary text-white rounded-full font-semibold"
+              className="flex-1 py-3 bg-primary text-white rounded-full font-semibold flex items-center justify-center"
             >
               {t.startCall}
             </button>
