@@ -1,5 +1,8 @@
+'use client'
 import { Phone, Mic, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import AgoraRTC, { IMicrophoneAudioTrack } from 'agora-rtc-sdk-ng'
+import { agoraConfig } from '../config/agora'
 
 interface AudioCallScreenProps {
   userName: string
@@ -12,6 +15,8 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeakerOn, setIsSpeakerOn] = useState(true)
+  const [localAudioTrack, setLocalAudioTrack] = useState<IMicrophoneAudioTrack | null>(null)
+  const [client] = useState(() => AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }))
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,6 +24,49 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
     }, 1000)
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const channelName = `audio_${Date.now()}`
+        await client.join(agoraConfig.appId, channelName, null, null)
+        
+        const audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
+        setLocalAudioTrack(audioTrack)
+        
+        await client.publish([audioTrack])
+      } catch (error) {
+        console.error('Agora audio init error:', error)
+      }
+    }
+
+    client.on('user-published', async (user, mediaType) => {
+      await client.subscribe(user, mediaType)
+      if (mediaType === 'audio') {
+        user.audioTrack?.play()
+      }
+    })
+
+    init()
+
+    return () => {
+      localAudioTrack?.close()
+      client.leave()
+    }
+  }, [])
+
+  const toggleMute = async () => {
+    if (localAudioTrack) {
+      await localAudioTrack.setEnabled(isMuted)
+      setIsMuted(!isMuted)
+    }
+  }
+
+  const handleEndCall = () => {
+    localAudioTrack?.close()
+    client.leave()
+    onEndCall()
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -49,14 +97,14 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
         </button>
 
         <button
-          onClick={onEndCall}
+          onClick={handleEndCall}
           className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
         >
           <Phone className="text-white rotate-[135deg]" size={28} />
         </button>
         
         <button
-          onClick={() => setIsMuted(!isMuted)}
+          onClick={toggleMute}
           className={`w-14 h-14 rounded-full flex items-center justify-center ${isMuted ? 'bg-red-500' : 'bg-white/30'}`}
         >
           <Mic className="text-white" size={24} />
