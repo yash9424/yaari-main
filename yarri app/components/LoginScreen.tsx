@@ -47,8 +47,6 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
     }
   }
 
-  const displayPhone = phoneNumber ? `+91 ${phoneNumber}` : '+91 '
-
   return (
     <div className="min-h-screen flex flex-col relative">
       <div 
@@ -69,16 +67,17 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
           <p className="text-gray-600 text-sm">Connect with real people</p>
         </div>
         
-        <div className="mb-4">
+        <div className="mb-4 relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-700">+91</span>
           <input
             type="tel"
             inputMode="numeric"
             placeholder="Enter your Phone Number"
-            value={displayPhone}
+            value={phoneNumber}
             onChange={handlePhoneChange}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className="w-full p-4 border border-gray-300 rounded-full text-base focus:outline-none focus:border-primary bg-gray-50"
+            className="w-full p-4 pl-14 border border-gray-300 rounded-full text-base focus:outline-none focus:border-primary bg-gray-50"
           />
         </div>
         
