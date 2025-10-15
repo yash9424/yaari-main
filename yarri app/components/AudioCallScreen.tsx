@@ -1,14 +1,14 @@
-import { Phone, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
+import { Phone, Mic, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 interface AudioCallScreenProps {
-  onEnd: () => void
   userName: string
   userAvatar: string
   rate: number
+  onEndCall: () => void
 }
 
-export default function AudioCallScreen({ onEnd, userName, userAvatar, rate }: AudioCallScreenProps) {
+export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall }: AudioCallScreenProps) {
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeakerOn, setIsSpeakerOn] = useState(true)
@@ -26,50 +26,40 @@ export default function AudioCallScreen({ onEnd, userName, userAvatar, rate }: A
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const calculateCost = () => {
-    const minutes = Math.ceil(duration / 60)
-    return minutes * rate
-  }
+  const cost = Math.ceil(duration / 60) * rate
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-primary to-orange-600 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-primary to-orange-600 flex flex-col items-center justify-center p-8">
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="w-40 h-40 bg-white bg-opacity-20 rounded-full overflow-hidden mb-6 border-4 border-white">
+        <div className="w-40 h-40 rounded-full overflow-hidden bg-white/20 mb-8">
           <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
         </div>
-
-        <h2 className="text-white text-2xl font-bold mb-2">{userName}</h2>
-        <p className="text-white text-opacity-80 text-sm mb-4">Audio Call</p>
-
-        <div className="bg-white bg-opacity-20 px-6 py-3 rounded-full mb-2">
-          <p className="text-white text-xl font-semibold">{formatTime(duration)}</p>
-        </div>
-
-        <div className="bg-white px-4 py-1 rounded-full">
-          <p className="text-primary text-sm font-semibold">₹{calculateCost()}</p>
-        </div>
+        
+        <h2 className="text-3xl font-bold text-white mb-4">{userName}</h2>
+        <p className="text-2xl text-white mb-2">{formatTime(duration)}</p>
+        <p className="text-lg text-white/80">₹{cost}</p>
       </div>
 
-      <div className="p-8 flex justify-center items-center space-x-6 mb-8">
+      <div className="flex justify-center items-center space-x-6 mb-8">
         <button
           onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-          className={`w-14 h-14 rounded-full flex items-center justify-center ${isSpeakerOn ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'}`}
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${isSpeakerOn ? 'bg-white/30' : 'bg-red-500'}`}
         >
-          {isSpeakerOn ? <Volume2 className="text-white" size={24} /> : <VolumeX className="text-white" size={24} />}
+          <Volume2 className="text-white" size={24} />
         </button>
 
         <button
-          onClick={onEnd}
+          onClick={onEndCall}
           className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
         >
           <Phone className="text-white rotate-[135deg]" size={28} />
         </button>
-
+        
         <button
           onClick={() => setIsMuted(!isMuted)}
-          className={`w-14 h-14 rounded-full flex items-center justify-center ${isMuted ? 'bg-red-500' : 'bg-white bg-opacity-30'}`}
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${isMuted ? 'bg-red-500' : 'bg-white/30'}`}
         >
-          {isMuted ? <MicOff className="text-white" size={24} /> : <Mic className="text-white" size={24} />}
+          <Mic className="text-white" size={24} />
         </button>
       </div>
     </div>

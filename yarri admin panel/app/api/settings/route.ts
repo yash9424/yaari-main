@@ -14,6 +14,7 @@ export async function GET() {
       minRecharge: 100,
       maxRecharge: 10000,
       commission: 20,
+      coinsPerRupee: 1,
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })

@@ -1,6 +1,6 @@
 import { Heart, User as UserIcon, Video, Phone } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CallConfirmationScreen from './CallConfirmationScreen'
 import { useLanguage } from '../contexts/LanguageContext'
 import { translations } from '../utils/translations'
@@ -9,12 +9,12 @@ interface UserListScreenProps {
   onNext: () => void
   onProfileClick: () => void
   onCoinClick: () => void
-  onUserClick: (userId: number) => void
+  onUserClick: (userId: string) => void
   onStartCall: (data: { userName: string; userAvatar: string; rate: number; type: 'video' | 'audio' }) => void
 }
 
 interface User {
-  id: number
+  id: string
   name: string
   attributes: string
   status: 'online' | 'offline' | 'busy'
@@ -26,13 +26,54 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
   const t = translations[lang]
   const [showCallModal, setShowCallModal] = useState(false)
   const [selectedCall, setSelectedCall] = useState<{ user: User; type: 'video' | 'audio'; rate: number } | null>(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [balance, setBalance] = useState(0)
 
-  const users: User[] = [
-    { id: 1, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'online', statusColor: 'bg-green-500' },
-    { id: 2, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'online', statusColor: 'bg-green-500' },
-    { id: 3, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'busy', statusColor: 'bg-red-500' },
-    { id: 4, name: lang === 'hi' ? 'उपयोगकर्ता नाम' : 'User Name', attributes: lang === 'hi' ? 'विशेषताएं' : 'Attributes', status: 'offline', statusColor: 'bg-gray-400' },
-  ]
+  useEffect(() => {
+    fetchUsers()
+    fetchBalance()
+  }, [])
+
+  const fetchBalance = async () => {
+    try {
+      const user = localStorage.getItem('user')
+      if (user) {
+        const userData = JSON.parse(user)
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+        const res = await fetch(`${apiUrl}/api/users/${userData.id}/balance`)
+        const data = await res.json()
+        if (res.ok) {
+          setBalance(data.balance || 0)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error)
+    }
+  }
+
+  const fetchUsers = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      const res = await fetch(`${apiUrl}/api/users`)
+      const data = await res.json()
+      
+      const formattedUsers = data.map((user: any) => ({
+        id: user._id,
+        name: user.name || 'User',
+        attributes: user.about || 'No description',
+        status: user.isActive ? 'online' : 'offline',
+        statusColor: user.isActive ? 'bg-green-500' : 'bg-gray-400',
+        profilePic: user.profilePic,
+      }))
+      
+      setUsers(formattedUsers)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleCallClick = (user: User, type: 'video' | 'audio', rate: number, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -45,7 +86,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
       setShowCallModal(false)
       onStartCall({
         userName: selectedCall.user.name,
-        userAvatar: `https://api.dicebear.com/7.x/big-smile/svg?seed=User${selectedCall.user.id}`,
+        userAvatar: selectedCall.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedCall.user.id}`,
         rate: selectedCall.rate,
         type: selectedCall.type
       })
@@ -62,7 +103,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
         <div className="flex items-center space-x-3">
           <button 
             onClick={onCoinClick}
-            className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center"
+            className="flex items-center space-x-2 bg-orange-400 px-3 py-2 rounded-full"
           >
             <Image 
               src="/images/bitcoin-icons_transactions-outline.svg" 
@@ -70,6 +111,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
               width={20} 
               height={20}
             />
+            <span className="text-white font-bold text-sm">₹{balance}</span>
           </button>
           <button 
             onClick={onProfileClick}
@@ -83,6 +125,15 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
       <div className="p-4">
         <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl h-40 mb-4"></div>
 
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No users found
+          </div>
+        ) : (
         <div className="space-y-3">
           {users.map((user) => (
             <div 
@@ -92,7 +143,11 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
             >
               <div className="relative flex-shrink-0">
                 <div className="w-24 h-24 bg-gray-300 rounded-full overflow-hidden">
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=User${user.id}`} alt="User" className="w-full h-full object-cover" />
+                  {user.profilePic ? (
+                    <img src={user.profilePic} alt="User" className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="User" className="w-full h-full object-cover" />
+                  )}
                 </div>
                 <div className={`absolute bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 ${user.statusColor} rounded-full text-white text-xs font-medium flex items-center space-x-1`}>
                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -122,6 +177,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {showCallModal && selectedCall && (
@@ -131,7 +187,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
           userName={selectedCall.user.name}
           callType={selectedCall.type}
           rate={selectedCall.rate}
-          userAvatar={`https://api.dicebear.com/7.x/big-smile/svg?seed=User${selectedCall.user.id}`}
+          userAvatar={selectedCall.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedCall.user.id}`}
         />
       )}
     </div>

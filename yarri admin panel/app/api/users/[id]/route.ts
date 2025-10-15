@@ -13,6 +13,59 @@ export async function OPTIONS() {
   })
 }
 
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const client = await clientPromise
+    const db = client.db('yarri')
+    
+    const user = await db.collection('users').findOne({ _id: new ObjectId(params.id) })
+    
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { 
+        status: 404,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
+    }
+    
+    return NextResponse.json(user, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch user' }, { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const client = await clientPromise
+    const db = client.db('yarri')
+    
+    await db.collection('users').deleteOne({ _id: new ObjectId(params.id) })
+    
+    return NextResponse.json({ success: true }, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete user' }, { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  }
+}
+
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const body = await request.json()

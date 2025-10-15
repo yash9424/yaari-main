@@ -1,14 +1,14 @@
-import { Phone, Mic, MicOff, Video, VideoOff, Volume2 } from 'lucide-react'
+import { Phone, Mic, Video, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 interface VideoCallScreenProps {
-  onEnd: () => void
   userName: string
   userAvatar: string
   rate: number
+  onEndCall: () => void
 }
 
-export default function VideoCallScreen({ onEnd, userName, userAvatar, rate }: VideoCallScreenProps) {
+export default function VideoCallScreen({ userName, userAvatar, rate, onEndCall }: VideoCallScreenProps) {
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
@@ -26,32 +26,25 @@ export default function VideoCallScreen({ onEnd, userName, userAvatar, rate }: V
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const calculateCost = () => {
-    const minutes = Math.ceil(duration / 60)
-    return minutes * rate
-  }
+  const cost = Math.ceil(duration / 60) * rate
 
   return (
-    <div className="fixed inset-0 bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
       <div className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-32 h-32 bg-gray-700 rounded-full overflow-hidden">
+          <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-800">
             <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
           </div>
         </div>
-
-        <div className="absolute top-8 left-0 right-0 flex flex-col items-center">
-          <h2 className="text-white text-xl font-semibold mb-2">{userName}</h2>
-          <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full">
-            <p className="text-white text-sm">{formatTime(duration)}</p>
-          </div>
-          <div className="mt-2 bg-primary px-3 py-1 rounded-full">
-            <p className="text-white text-xs">₹{calculateCost()}</p>
-          </div>
+        
+        <div className="absolute top-8 left-0 right-0 text-center text-white">
+          <h2 className="text-2xl font-bold mb-2">{userName}</h2>
+          <p className="text-lg">{formatTime(duration)}</p>
+          <p className="text-sm text-gray-400 mt-1">₹{cost}</p>
         </div>
 
-        <div className="absolute bottom-32 right-4 w-24 h-32 bg-gray-800 rounded-2xl overflow-hidden border-2 border-white">
-          <div className="w-full h-full flex items-center justify-center text-white text-xs">
+        <div className="absolute bottom-32 left-4 w-24 h-32 bg-gray-800 rounded-lg overflow-hidden">
+          <div className="w-full h-full bg-gray-700 flex items-center justify-center text-white text-xs">
             You
           </div>
         </div>
@@ -62,21 +55,21 @@ export default function VideoCallScreen({ onEnd, userName, userAvatar, rate }: V
           onClick={() => setIsMuted(!isMuted)}
           className={`w-14 h-14 rounded-full flex items-center justify-center ${isMuted ? 'bg-red-500' : 'bg-gray-700'}`}
         >
-          {isMuted ? <MicOff className="text-white" size={24} /> : <Mic className="text-white" size={24} />}
+          <Mic className="text-white" size={24} />
         </button>
-
+        
         <button
-          onClick={onEnd}
+          onClick={onEndCall}
           className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center"
         >
           <Phone className="text-white rotate-[135deg]" size={28} />
         </button>
-
+        
         <button
           onClick={() => setIsVideoOff(!isVideoOff)}
           className={`w-14 h-14 rounded-full flex items-center justify-center ${isVideoOff ? 'bg-red-500' : 'bg-gray-700'}`}
         >
-          {isVideoOff ? <VideoOff className="text-white" size={24} /> : <Video className="text-white" size={24} />}
+          <Video className="text-white" size={24} />
         </button>
       </div>
     </div>

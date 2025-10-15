@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
 
 export default function SettingsPage() {
@@ -9,7 +9,15 @@ export default function SettingsPage() {
     minRecharge: 100,
     maxRecharge: 10000,
     commission: 20,
+    coinsPerRupee: 1,
   })
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => {})
+  }, [])
 
   const handleSave = async () => {
     try {
@@ -70,6 +78,20 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({ ...settings, commission: Number(e.target.value) })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Coins Per Rupee</label>
+              <input
+                type="number"
+                step="0.1"
+                value={settings.coinsPerRupee}
+                onChange={(e) => setSettings({ ...settings, coinsPerRupee: Number(e.target.value) })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Example: If set to 0.5, then ₹100 = 50 coins
+              </p>
             </div>
           </div>
         </div>

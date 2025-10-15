@@ -5,13 +5,40 @@ import { Search, Edit, Trash2, Eye } from 'lucide-react'
 export default function UsersPage() {
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
+    loadUsers()
+  }, [])
+
+  const loadUsers = () => {
     fetch('/api/users')
       .then(res => res.json())
       .then(data => setUsers(data))
       .catch(() => {})
-  }, [])
+  }
+
+  const handleView = (user: any) => {
+    setSelectedUser(user)
+    setShowModal(true)
+  }
+
+  const handleDelete = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' })
+      if (res.ok) {
+        alert('User deleted successfully')
+        loadUsers()
+      } else {
+        alert('Failed to delete user')
+      }
+    } catch (error) {
+      alert('Error deleting user')
+    }
+  }
 
   return (
     <div className="p-8">
@@ -57,7 +84,13 @@ export default function UsersPage() {
                   <tr key={user._id} className="border-b hover:bg-gray-50">
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-primary rounded-full"></div>
+                        {user.profilePic ? (
+                          <img src={user.profilePic} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                            {(user.name || 'U')[0].toUpperCase()}
+                          </div>
+                        )}
                         <span className="font-medium">{user.name || 'User'}</span>
                       </div>
                     </td>
@@ -71,13 +104,10 @@ export default function UsersPage() {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex space-x-2">
-                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                        <button onClick={() => handleView(user)} className="p-2 hover:bg-gray-100 rounded-lg">
                           <Eye size={18} className="text-gray-600" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 rounded-lg">
-                          <Edit size={18} className="text-blue-600" />
-                        </button>
-                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                        <button onClick={() => handleDelete(user._id)} className="p-2 hover:bg-gray-100 rounded-lg">
                           <Trash2 size={18} className="text-red-600" />
                         </button>
                       </div>
@@ -89,6 +119,83 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
+
+      {showModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4 mb-6">
+                {selectedUser.profilePic ? (
+                  <img src={selectedUser.profilePic} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
+                ) : (
+                  <div className="w-20 h-20 bg-primary rounded-full"></div>
+                )}
+                <div>
+                  <h3 className="text-xl font-bold">{selectedUser.name || 'User'}</h3>
+                  <p className="text-gray-600">{selectedUser.phone}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Gender</label>
+                  <p className="text-gray-800 capitalize">{selectedUser.gender || 'Not set'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Balance</label>
+                  <p className="text-gray-800">₹{selectedUser.balance || 0}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Status</label>
+                  <p className="text-gray-800">{selectedUser.isActive ? 'Active' : 'Inactive'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Joined</label>
+                  <p className="text-gray-800">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {selectedUser.about && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">About</label>
+                  <p className="text-gray-800">{selectedUser.about}</p>
+                </div>
+              )}
+
+              {selectedUser.hobbies && selectedUser.hobbies.length > 0 && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Hobbies</label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedUser.hobbies.map((hobby: string, i: number) => (
+                      <span key={i} className="bg-orange-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                        {hobby}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.gallery && selectedUser.gallery.length > 0 && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-600">Gallery</label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {selectedUser.gallery.map((img: string, i: number) => (
+                      <img key={i} src={img} alt={`Gallery ${i}`} className="w-full h-24 object-cover rounded-lg" />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,11 +1,37 @@
 import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 
 interface CoinPurchaseScreenProps {
   onBack: () => void
 }
 
 export default function CoinPurchaseScreen({ onBack }: CoinPurchaseScreenProps) {
+  const [balance, setBalance] = useState(0)
+
+  useEffect(() => {
+    const user = localStorage.getItem('user')
+    if (user) {
+      const userData = JSON.parse(user)
+      fetchBalance(userData.id)
+    }
+  }, [])
+
+  const fetchBalance = async (userId: string) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      const res = await fetch(`${apiUrl}/api/users/${userId}/balance`)
+      const data = await res.json()
+      if (res.ok) {
+        setBalance(data.balance || 0)
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        user.balance = data.balance
+        localStorage.setItem('user', JSON.stringify(user))
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error)
+    }
+  }
   const coinPackages = [
     { coins: 50, originalPrice: 100, price: 50 },
     { coins: 50, originalPrice: 100, price: 50 },
@@ -28,7 +54,7 @@ export default function CoinPurchaseScreen({ onBack }: CoinPurchaseScreenProps) 
           </div>
           <div>
             <p className="text-gray-700 text-sm mb-1">Total Coin Balance</p>
-            <p className="text-3xl font-bold">0</p>
+            <p className="text-3xl font-bold">₹{balance}</p>
           </div>
         </div>
 

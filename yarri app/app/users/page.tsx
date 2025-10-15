@@ -14,7 +14,7 @@ export default function UsersPage() {
       onCoinClick={() => router.push('/coins')}
       onUserClick={(id) => router.push(`/users/${id}`)}
       onStartCall={(data) => {
-        setCallData(data)
+        sessionStorage.setItem('callData', JSON.stringify(data))
         router.push(data.type === 'video' ? '/video-call' : '/audio-call')
       }}
     />
