@@ -14,12 +14,10 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   try {
-    const { phone, otp } = await request.json()
+    const { email, name, googleId, profilePic } = await request.json()
     
     const client = await clientPromise
     const db = client.db('yarri')
-    
-    const otpRecord = await db.collection('otps').findOne({ phone })
     
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -27,39 +25,50 @@ export async function POST(request: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     }
 
-    if (!otpRecord) {
-      return NextResponse.json({ error: 'OTP not found' }, { status: 400, headers: corsHeaders })
-    }
-    
-    if (new Date() > otpRecord.expiresAt) {
-      return NextResponse.json({ error: 'OTP expired' }, { status: 400, headers: corsHeaders })
-    }
-    
-    if (otpRecord.otp !== otp) {
-      return NextResponse.json({ error: 'Invalid OTP' }, { status: 400, headers: corsHeaders })
-    }
-    
-    let user = await db.collection('users').findOne({ phone })
+    let user = await db.collection('users').findOne({ email })
     
     if (!user) {
       const result = await db.collection('users').insertOne({
-        phone,
+        email,
+        name,
+        googleId,
+        profilePic,
         createdAt: new Date(),
         isActive: true,
         balance: 0,
+        loginMethod: 'google',
       })
-      user = { _id: result.insertedId, phone, balance: 0, isActive: true, createdAt: new Date() }
+      user = { 
+        _id: result.insertedId, 
+        email, 
+        name, 
+        googleId, 
+        profilePic, 
+        balance: 0, 
+        isActive: true, 
+        createdAt: new Date(),
+        loginMethod: 'google',
+      }
+    } else {
+      await db.collection('users').updateOne(
+        { email },
+        { 
+          $set: { 
+            name, 
+            googleId, 
+            profilePic,
+            lastLogin: new Date() 
+          } 
+        }
+      )
     }
     
-    await db.collection('otps').deleteOne({ phone })
-    
-    console.log(`✅ User logged in: ${phone}\n`)
+    console.log(`✅ User logged in via Google: ${email}\n`)
     
     return NextResponse.json({ 
       success: true, 
       user: {
         id: user._id,
-        phone: user.phone,
         email: user.email,
         name: user.name,
         gender: user.gender,
@@ -68,10 +77,12 @@ export async function POST(request: Request) {
         profilePic: user.profilePic,
         gallery: user.gallery,
         balance: user.balance || 0,
+        phone: user.phone,
       }
     }, { headers: corsHeaders })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to verify OTP' }, { 
+    console.error('Google login error:', error)
+    return NextResponse.json({ error: 'Failed to login with Google' }, { 
       status: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',

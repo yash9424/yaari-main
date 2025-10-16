@@ -28,7 +28,7 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
   useEffect(() => {
     const init = async () => {
       try {
-        const channelName = `audio_${Date.now()}`
+        const channelName = sessionStorage.getItem('channelName') || `audio_${Date.now()}`
         await client.join(agoraConfig.appId, channelName, null, null)
         
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack()

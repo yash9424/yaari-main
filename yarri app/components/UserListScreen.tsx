@@ -2,8 +2,11 @@ import { Heart, User as UserIcon, Video, Phone } from 'lucide-react'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import CallConfirmationScreen from './CallConfirmationScreen'
+import IncomingCallModal from './IncomingCallModal'
 import { useLanguage } from '../contexts/LanguageContext'
 import { translations } from '../utils/translations'
+import { useSocket } from '../contexts/SocketContext'
+import { useRouter } from 'next/navigation'
 
 interface UserListScreenProps {
   onNext: () => void
@@ -24,16 +27,51 @@ interface User {
 export default function UserListScreen({ onNext, onProfileClick, onCoinClick, onUserClick, onStartCall }: UserListScreenProps) {
   const { lang } = useLanguage()
   const t = translations[lang]
+  const router = useRouter()
+  const { socket } = useSocket()
   const [showCallModal, setShowCallModal] = useState(false)
   const [selectedCall, setSelectedCall] = useState<{ user: User; type: 'video' | 'audio'; rate: number } | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState(0)
+  const [incomingCall, setIncomingCall] = useState<{ callerName: string; callType: 'video' | 'audio'; channelName: string } | null>(null)
+  const [isRinging, setIsRinging] = useState(false)
 
   useEffect(() => {
     fetchUsers()
     fetchBalance()
   }, [])
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('incoming-call', ({ callerName, callType, channelName }) => {
+      console.log('Incoming call received:', { callerName, callType, channelName })
+      setIncomingCall({ callerName, callType, channelName })
+    })
+
+    socket.on('call-accepted', ({ channelName }) => {
+      console.log('Call accepted, navigating to call screen')
+      setIsRinging(false)
+      sessionStorage.setItem('channelName', channelName)
+      const callData = sessionStorage.getItem('callData')
+      if (callData) {
+        const data = JSON.parse(callData)
+        router.push(data.type === 'video' ? '/video-call' : '/audio-call')
+      }
+    })
+
+    socket.on('call-declined', () => {
+      setIsRinging(false)
+      alert('Call declined')
+    })
+
+    return () => {
+      socket.off('incoming-call')
+      socket.off('call-accepted')
+      socket.off('call-declined')
+    }
+  }, [socket, selectedCall, router])
 
   const fetchBalance = async () => {
     try {
@@ -54,18 +92,23 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
 
   const fetchUsers = async () => {
     try {
+      const currentUser = localStorage.getItem('user')
+      const currentUserId = currentUser ? JSON.parse(currentUser).id : null
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
       const res = await fetch(`${apiUrl}/api/users`)
       const data = await res.json()
       
-      const formattedUsers = data.map((user: any) => ({
-        id: user._id,
-        name: user.name || 'User',
-        attributes: user.about || 'No description',
-        status: user.isActive ? 'online' : 'offline',
-        statusColor: user.isActive ? 'bg-green-500' : 'bg-gray-400',
-        profilePic: user.profilePic,
-      }))
+      const formattedUsers = data
+        .filter((user: any) => user._id !== currentUserId)
+        .map((user: any) => ({
+          id: user._id,
+          name: user.name || 'User',
+          attributes: user.about || 'No description',
+          status: user.isActive ? 'online' : 'offline',
+          statusColor: user.isActive ? 'bg-green-500' : 'bg-gray-400',
+          profilePic: user.profilePic,
+        }))
       
       setUsers(formattedUsers)
     } catch (error) {
@@ -82,14 +125,70 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
   }
 
   const handleConfirmCall = () => {
-    if (selectedCall) {
+    if (selectedCall && socket) {
       setShowCallModal(false)
-      onStartCall({
+      setIsRinging(true)
+      
+      const user = localStorage.getItem('user')
+      const userData = user ? JSON.parse(user) : null
+      const channelName = `call_${Date.now()}`
+      
+      console.log('Calling user:', {
+        callerId: userData?.id,
+        callerName: userData?.name,
+        receiverId: selectedCall.user.id,
+        callType: selectedCall.type
+      })
+      
+      sessionStorage.setItem('callData', JSON.stringify({
         userName: selectedCall.user.name,
         userAvatar: selectedCall.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedCall.user.id}`,
         rate: selectedCall.rate,
-        type: selectedCall.type
+        type: selectedCall.type,
+        channelName
+      }))
+      
+      socket.emit('call-user', {
+        callerId: userData?.id,
+        callerName: userData?.name || 'User',
+        receiverId: selectedCall.user.id,
+        callType: selectedCall.type,
+        channelName
       })
+    }
+  }
+
+  const handleAcceptCall = () => {
+    if (incomingCall && socket) {
+      const user = localStorage.getItem('user')
+      const userData = user ? JSON.parse(user) : null
+      
+      sessionStorage.setItem('channelName', incomingCall.channelName)
+      sessionStorage.setItem('callData', JSON.stringify({
+        userName: incomingCall.callerName,
+        userAvatar: '',
+        rate: incomingCall.callType === 'video' ? 10 : 5,
+        type: incomingCall.callType,
+        channelName: incomingCall.channelName
+      }))
+      
+      socket.emit('accept-call', {
+        callerId: userData?.id,
+        channelName: incomingCall.channelName
+      })
+      
+      setIncomingCall(null)
+      router.push(incomingCall.callType === 'video' ? '/video-call' : '/audio-call')
+    }
+  }
+
+  const handleDeclineCall = () => {
+    if (socket) {
+      const user = localStorage.getItem('user')
+      const userData = user ? JSON.parse(user) : null
+      
+      socket.emit('decline-call', { callerId: userData?.id })
+      setIncomingCall(null)
     }
   }
 
@@ -189,6 +288,26 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
           rate={selectedCall.rate}
           userAvatar={selectedCall.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedCall.user.id}`}
         />
+      )}
+
+      {incomingCall && (
+        <IncomingCallModal
+          callerName={incomingCall.callerName}
+          callType={incomingCall.callType}
+          onAccept={handleAcceptCall}
+          onDecline={handleDeclineCall}
+        />
+      )}
+
+      {isRinging && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="w-24 h-24 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
+              <Phone size={40} className="text-white" />
+            </div>
+            <p className="text-white text-xl">Ringing...</p>
+          </div>
+        </div>
       )}
     </div>
   )

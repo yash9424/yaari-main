@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import LoginScreen from '@/components/LoginScreen'
 
 export default function LoginPage() {
@@ -24,5 +25,9 @@ export default function LoginPage() {
 
   if (!mounted) return null
   
-  return <LoginScreen onNext={() => router.push('/otp')} />
+  return (
+    <GoogleOAuthProvider clientId="38963010109-kms7n3hb3dno6m5ol27km954mnmbf0vc.apps.googleusercontent.com">
+      <LoginScreen onNext={() => router.push('/otp')} />
+    </GoogleOAuthProvider>
+  )
 }

@@ -66,6 +66,7 @@ export default function UsersPage() {
               <tr className="border-b">
                 <th className="text-left py-4 px-4 font-semibold text-gray-700">User</th>
                 <th className="text-left py-4 px-4 font-semibold text-gray-700">Phone</th>
+                <th className="text-left py-4 px-4 font-semibold text-gray-700">Email</th>
                 <th className="text-left py-4 px-4 font-semibold text-gray-700">Gender</th>
                 <th className="text-left py-4 px-4 font-semibold text-gray-700">Balance</th>
                 <th className="text-left py-4 px-4 font-semibold text-gray-700">Status</th>
@@ -75,7 +76,7 @@ export default function UsersPage() {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-500">
+                  <td colSpan={7} className="text-center py-8 text-gray-500">
                     No users found
                   </td>
                 </tr>
@@ -94,8 +95,9 @@ export default function UsersPage() {
                         <span className="font-medium">{user.name || 'User'}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4">{user.phone}</td>
-                    <td className="py-4 px-4">{user.gender}</td>
+                    <td className="py-4 px-4">{user.phone || '-'}</td>
+                    <td className="py-4 px-4">{user.email || '-'}</td>
+                    <td className="py-4 px-4">{user.gender || '-'}</td>
                     <td className="py-4 px-4">₹{user.balance || 0}</td>
                     <td className="py-4 px-4">
                       <span className={`px-3 py-1 rounded-full text-sm ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
@@ -139,11 +141,23 @@ export default function UsersPage() {
                 )}
                 <div>
                   <h3 className="text-xl font-bold">{selectedUser.name || 'User'}</h3>
-                  <p className="text-gray-600">{selectedUser.phone}</p>
+                  <p className="text-gray-600">{selectedUser.phone || selectedUser.email}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                {selectedUser.phone && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Phone</label>
+                    <p className="text-gray-800">{selectedUser.phone}</p>
+                  </div>
+                )}
+                {selectedUser.email && (
+                  <div>
+                    <label className="text-sm font-semibold text-gray-600">Email</label>
+                    <p className="text-gray-800">{selectedUser.email}</p>
+                  </div>
+                )}
                 <div>
                   <label className="text-sm font-semibold text-gray-600">Gender</label>
                   <p className="text-gray-800 capitalize">{selectedUser.gender || 'Not set'}</p>

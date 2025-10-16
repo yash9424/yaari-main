@@ -1,6 +1,7 @@
 import './globals.css'
 import { Baloo_Tammudu_2 } from 'next/font/google'
 import { LanguageProvider } from '../contexts/LanguageContext'
+import { SocketProvider } from '../contexts/SocketContext'
 
 const balooTammudu = Baloo_Tammudu_2({ 
   subsets: ['latin'],
@@ -31,11 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={balooTammudu.variable}>
       <body className={balooTammudu.className}>
-        <LanguageProvider>
-          <div className="mobile-container">
-            {children}
-          </div>
-        </LanguageProvider>
+        <SocketProvider>
+          <LanguageProvider>
+            <div className="mobile-container">
+              {children}
+            </div>
+          </LanguageProvider>
+        </SocketProvider>
       </body>
     </html>
   )

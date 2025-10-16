@@ -12,6 +12,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
   const t = translations[lang]
   const [userName, setUserName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [email, setEmail] = useState('')
   const [aboutMe, setAboutMe] = useState('')
   const [hobbies, setHobbies] = useState<string[]>([])
   const [newHobby, setNewHobby] = useState('')
@@ -26,6 +27,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
       const userData = JSON.parse(user)
       setUserName(userData.name || '')
       setPhoneNumber(userData.phone || '')
+      setEmail(userData.email || '')
       setAboutMe(userData.about || '')
       setHobbies(userData.hobbies || [])
       setGender(userData.gender || '')
@@ -113,6 +115,15 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           placeholder="Phone Number"
+          className="w-full p-4 border border-gray-300 rounded-full text-base focus:outline-none focus:border-primary bg-gray-50"
+          style={{ fontSize: '16px' }}
+        />
+        
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email Address"
           className="w-full p-4 border border-gray-300 rounded-full text-base focus:outline-none focus:border-primary bg-gray-50"
           style={{ fontSize: '16px' }}
         />
@@ -210,6 +221,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
               
               const payload = {
                 name: userName,
+                email: email,
                 about: aboutMe,
                 hobbies,
                 profilePic,
@@ -228,7 +240,7 @@ export default function EditProfileScreen({ onBack }: EditProfileScreenProps) {
               console.log('Save response:', result)
               
               if (res.ok) {
-                const updatedUser = { ...user, name: userName, about: aboutMe, hobbies, profilePic, gallery: images }
+                const updatedUser = { ...user, name: userName, email: email, about: aboutMe, hobbies, profilePic, gallery: images }
                 localStorage.setItem('user', JSON.stringify(updatedUser))
                 alert('Profile saved to database successfully!')
                 window.location.href = '/users'
