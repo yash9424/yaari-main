@@ -1,8 +1,10 @@
 'use client'
-import { Phone, Mic, Video } from 'lucide-react'
+import { Phone, Mic, Video, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import AgoraRTC, { IAgoraRTCRemoteUser, ICameraVideoTrack, IMicrophoneAudioTrack } from 'agora-rtc-sdk-ng'
 import { agoraConfig } from '../config/agora'
+import { useSocket } from '../contexts/SocketContext'
+import { useRouter } from 'next/navigation'
 
 interface VideoCallScreenProps {
   userName: string
@@ -12,9 +14,12 @@ interface VideoCallScreenProps {
 }
 
 export default function VideoCallScreen({ userName, userAvatar, rate, onEndCall }: VideoCallScreenProps) {
+  const router = useRouter()
+  const { socket } = useSocket()
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
+  const [currentCamera, setCurrentCamera] = useState<'user' | 'environment'>('user')
   const [localVideoTrack, setLocalVideoTrack] = useState<ICameraVideoTrack | null>(null)
   const [localAudioTrack, setLocalAudioTrack] = useState<IMicrophoneAudioTrack | null>(null)
   const [remoteUsers, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([])
@@ -28,10 +33,67 @@ export default function VideoCallScreen({ userName, userAvatar, rate, onEndCall 
   }, [])
 
   useEffect(() => {
+    if (!socket) {
+      console.log('Socket not available in video call')
+      return
+    }
+
+    console.log('Setting up call-ended listener in video call')
+
+    const handleRemoteCallEnd = () => {
+      console.log('🔴 CALL ENDED BY OTHER USER - CLOSING VIDEO CALL')
+      
+      // Close tracks and leave channel WITHOUT emitting end-call again
+      try {
+        if (localVideoTrack) {
+          console.log('Closing local video track')
+          localVideoTrack.close()
+        }
+        if (localAudioTrack) {
+          console.log('Closing local audio track')
+          localAudioTrack.close()
+        }
+        console.log('Leaving Agora channel')
+        client.leave()
+        
+        console.log('Clearing session data')
+        sessionStorage.removeItem('callData')
+        sessionStorage.removeItem('channelName')
+        
+        console.log('Navigating to /users')
+        // Use window.location for guaranteed navigation
+        window.location.href = '/users'
+      } catch (error) {
+        console.error('Error during call cleanup:', error)
+        router.push('/users')
+      }
+    }
+
+    socket.on('call-ended', handleRemoteCallEnd)
+    console.log('call-ended listener registered')
+
+    return () => {
+      console.log('Removing call-ended listener')
+      socket.off('call-ended', handleRemoteCallEnd)
+    }
+  }, [socket, localVideoTrack, localAudioTrack, client, router])
+
+  useEffect(() => {
     const init = async () => {
       try {
         const channelName = sessionStorage.getItem('channelName') || `call_${Date.now()}`
-        await client.join(agoraConfig.appId, channelName, null, null)
+        
+        // Get Agora token from backend
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+        const tokenRes = await fetch(`${apiUrl}/api/agora/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelName }),
+        })
+        const { token } = await tokenRes.json()
+        console.log('Got Agora token')
+        
+        await client.join(agoraConfig.appId, channelName, token, null)
         
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
         const videoTrack = await AgoraRTC.createCameraVideoTrack()
@@ -85,11 +147,80 @@ export default function VideoCallScreen({ userName, userAvatar, rate, onEndCall 
     }
   }
 
+  const flipCamera = async () => {
+    try {
+      if (localVideoTrack) {
+        // Close current video track
+        localVideoTrack.close()
+        
+        // Create new video track with opposite camera
+        const newCamera = currentCamera === 'user' ? 'environment' : 'user'
+        const newVideoTrack = await AgoraRTC.createCameraVideoTrack({
+          facingMode: newCamera
+        })
+        
+        // Unpublish old track and publish new one
+        await client.unpublish([localVideoTrack])
+        await client.publish([newVideoTrack])
+        
+        // Update state
+        setLocalVideoTrack(newVideoTrack)
+        setCurrentCamera(newCamera)
+        
+        // Play new video
+        newVideoTrack.play('local-video')
+        
+        console.log('Camera flipped to:', newCamera)
+      }
+    } catch (error) {
+      console.error('Error flipping camera:', error)
+      alert('Could not flip camera. Make sure you have multiple cameras.')
+    }
+  }
+
   const handleEndCall = () => {
-    localVideoTrack?.close()
-    localAudioTrack?.close()
+    console.log('🔴 USER CLICKED END CALL BUTTON')
+    const callData = sessionStorage.getItem('callData')
+    console.log('Call data:', callData)
+    
+    // Notify other user FIRST before cleanup
+    if (callData && socket) {
+      const data = JSON.parse(callData)
+      const user = localStorage.getItem('user')
+      const userData = user ? JSON.parse(user) : null
+      
+      console.log('Current user:', userData?.id)
+      console.log('Other user:', data.otherUserId)
+      
+      if (data.otherUserId && userData?.id) {
+        console.log('📤 EMITTING end-call TO:', data.otherUserId)
+        socket.emit('end-call', {
+          userId: userData.id,
+          otherUserId: data.otherUserId
+        })
+        console.log('end-call event emitted successfully')
+      } else {
+        console.log('Missing otherUserId or current userId')
+      }
+    } else {
+      console.log('No call data or socket not available')
+    }
+    
+    // Then cleanup local resources
+    console.log('Cleaning up local resources')
+    if (localVideoTrack) {
+      localVideoTrack.close()
+    }
+    if (localAudioTrack) {
+      localAudioTrack.close()
+    }
     client.leave()
-    onEndCall()
+    sessionStorage.removeItem('callData')
+    sessionStorage.removeItem('channelName')
+    
+    console.log('Navigating back to users page')
+    // Navigate back
+    window.location.href = '/users'
   }
 
   const formatTime = (seconds: number) => {
@@ -119,15 +250,30 @@ export default function VideoCallScreen({ userName, userAvatar, rate, onEndCall 
           <p className="text-sm text-gray-400 mt-1">₹{cost}</p>
         </div>
 
-        <div id="local-video" className="absolute bottom-32 left-4 w-24 h-32 bg-gray-800 rounded-lg overflow-hidden z-10" />
+        <div className="absolute bottom-32 left-4 z-10">
+          <div id="local-video" className="w-24 h-32 bg-gray-800 rounded-lg overflow-hidden" />
+          <button
+            onClick={flipCamera}
+            className="absolute top-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"
+          >
+            <RefreshCw className="text-white" size={16} />
+          </button>
+        </div>
       </div>
 
-      <div className="p-8 flex justify-center items-center space-x-6">
+      <div className="p-8 flex justify-center items-center space-x-4">
         <button
           onClick={toggleMute}
           className={`w-14 h-14 rounded-full flex items-center justify-center ${isMuted ? 'bg-red-500' : 'bg-gray-700'}`}
         >
           <Mic className="text-white" size={24} />
+        </button>
+        
+        <button
+          onClick={flipCamera}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-700"
+        >
+          <RefreshCw className="text-white" size={24} />
         </button>
         
         <button

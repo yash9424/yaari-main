@@ -16,7 +16,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:3000', {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+    const socketInstance = io(apiUrl, {
       transports: ['websocket', 'polling']
     })
 

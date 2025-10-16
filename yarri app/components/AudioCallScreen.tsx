@@ -3,6 +3,8 @@ import { Phone, Mic, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import AgoraRTC, { IMicrophoneAudioTrack } from 'agora-rtc-sdk-ng'
 import { agoraConfig } from '../config/agora'
+import { useSocket } from '../contexts/SocketContext'
+import { useRouter } from 'next/navigation'
 
 interface AudioCallScreenProps {
   userName: string
@@ -12,6 +14,8 @@ interface AudioCallScreenProps {
 }
 
 export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall }: AudioCallScreenProps) {
+  const router = useRouter()
+  const { socket } = useSocket()
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeakerOn, setIsSpeakerOn] = useState(true)
@@ -26,10 +30,63 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
   }, [])
 
   useEffect(() => {
+    if (!socket) {
+      console.log('Socket not available in audio call')
+      return
+    }
+
+    console.log('Setting up call-ended listener in audio call')
+
+    const handleRemoteCallEnd = () => {
+      console.log('🔴 CALL ENDED BY OTHER USER - CLOSING AUDIO CALL')
+      
+      // Close tracks and leave channel WITHOUT emitting end-call again
+      try {
+        if (localAudioTrack) {
+          console.log('Closing local audio track')
+          localAudioTrack.close()
+        }
+        console.log('Leaving Agora channel')
+        client.leave()
+        
+        console.log('Clearing session data')
+        sessionStorage.removeItem('callData')
+        sessionStorage.removeItem('channelName')
+        
+        console.log('Navigating to /users')
+        // Use window.location for guaranteed navigation
+        window.location.href = '/users'
+      } catch (error) {
+        console.error('Error during call cleanup:', error)
+        router.push('/users')
+      }
+    }
+
+    socket.on('call-ended', handleRemoteCallEnd)
+    console.log('call-ended listener registered')
+
+    return () => {
+      console.log('Removing call-ended listener')
+      socket.off('call-ended', handleRemoteCallEnd)
+    }
+  }, [socket, localAudioTrack, client, router])
+
+  useEffect(() => {
     const init = async () => {
       try {
         const channelName = sessionStorage.getItem('channelName') || `audio_${Date.now()}`
-        await client.join(agoraConfig.appId, channelName, null, null)
+        
+        // Get Agora token from backend
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+        const tokenRes = await fetch(`${apiUrl}/api/agora/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelName }),
+        })
+        const { token } = await tokenRes.json()
+        console.log('Got Agora token')
+        
+        await client.join(agoraConfig.appId, channelName, token, null)
         
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
         setLocalAudioTrack(audioTrack)
@@ -63,9 +120,45 @@ export default function AudioCallScreen({ userName, userAvatar, rate, onEndCall 
   }
 
   const handleEndCall = () => {
-    localAudioTrack?.close()
+    console.log('🔴 USER CLICKED END CALL BUTTON')
+    const callData = sessionStorage.getItem('callData')
+    console.log('Call data:', callData)
+    
+    // Notify other user FIRST before cleanup
+    if (callData && socket) {
+      const data = JSON.parse(callData)
+      const user = localStorage.getItem('user')
+      const userData = user ? JSON.parse(user) : null
+      
+      console.log('Current user:', userData?.id)
+      console.log('Other user:', data.otherUserId)
+      
+      if (data.otherUserId && userData?.id) {
+        console.log('📤 EMITTING end-call TO:', data.otherUserId)
+        socket.emit('end-call', {
+          userId: userData.id,
+          otherUserId: data.otherUserId
+        })
+        console.log('end-call event emitted successfully')
+      } else {
+        console.log('Missing otherUserId or current userId')
+      }
+    } else {
+      console.log('No call data or socket not available')
+    }
+    
+    // Then cleanup local resources
+    console.log('Cleaning up local resources')
+    if (localAudioTrack) {
+      localAudioTrack.close()
+    }
     client.leave()
-    onEndCall()
+    sessionStorage.removeItem('callData')
+    sessionStorage.removeItem('channelName')
+    
+    console.log('Navigating back to users page')
+    // Navigate back
+    window.location.href = '/users'
   }
 
   const formatTime = (seconds: number) => {

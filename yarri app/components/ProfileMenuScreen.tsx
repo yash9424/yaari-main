@@ -17,6 +17,7 @@ export default function ProfileMenuScreen({ onBack, onCallHistory, onTransaction
   const t = translations[lang]
   const [userName, setUserName] = useState('User Name')
   const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [profilePic, setProfilePic] = useState('')
 
   useEffect(() => {
@@ -25,7 +26,12 @@ export default function ProfileMenuScreen({ onBack, onCallHistory, onTransaction
       const userData = JSON.parse(user)
       setUserName(userData.name || 'User Name')
       setPhone(userData.phone || '')
-      setProfilePic(userData.profilePic || '')
+      setEmail(userData.email || '')
+      
+      // Priority: 1. Uploaded profile pic (non-Google URL), 2. Google profile pic, 3. None
+      if (userData.profilePic) {
+        setProfilePic(userData.profilePic)
+      }
     }
   }, [])
 
@@ -63,7 +69,8 @@ export default function ProfileMenuScreen({ onBack, onCallHistory, onTransaction
             </button>
           </div>
           <h2 className="text-xl font-bold text-gray-800">{userName}</h2>
-          <p className="text-gray-600 text-sm">+91 {phone}</p>
+          {phone && <p className="text-gray-600 text-sm">+91 {phone}</p>}
+          {email && !phone && <p className="text-gray-600 text-sm">{email}</p>}
         </div>
 
         <div className="space-y-3">

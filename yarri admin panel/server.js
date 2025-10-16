@@ -44,27 +44,37 @@ app.prepare().then(() => {
         console.log(`Call sent from ${callerName} to ${receiverId}`)
       } else {
         console.log(`Receiver ${receiverId} not found in registered users`)
+        const callerSocketId = users.get(callerId)
+        if (callerSocketId) {
+          io.to(callerSocketId).emit('call-declined')
+        }
       }
     })
 
     socket.on('accept-call', ({ callerId, channelName }) => {
+      console.log('Call accepted by receiver, notifying caller:', callerId)
       const callerSocketId = users.get(callerId)
       if (callerSocketId) {
         io.to(callerSocketId).emit('call-accepted', { channelName })
+        console.log('Call accepted notification sent to caller')
       }
     })
 
     socket.on('decline-call', ({ callerId }) => {
+      console.log('Call declined by receiver, notifying caller:', callerId)
       const callerSocketId = users.get(callerId)
       if (callerSocketId) {
         io.to(callerSocketId).emit('call-declined')
+        console.log('Call declined notification sent to caller')
       }
     })
 
-    socket.on('end-call', ({ userId }) => {
-      const userSocketId = users.get(userId)
-      if (userSocketId) {
-        io.to(userSocketId).emit('call-ended')
+    socket.on('end-call', ({ userId, otherUserId }) => {
+      console.log('Call ended, notifying other user:', otherUserId)
+      const otherUserSocketId = users.get(otherUserId)
+      if (otherUserSocketId) {
+        io.to(otherUserSocketId).emit('call-ended')
+        console.log('Call ended notification sent')
       }
     })
 

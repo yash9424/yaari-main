@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import CallConfirmationScreen from './CallConfirmationScreen'
 import IncomingCallModal from './IncomingCallModal'
+import PermissionModal from './PermissionModal'
+import PermissionDeniedModal from './PermissionDeniedModal'
 import { useLanguage } from '../contexts/LanguageContext'
 import { translations } from '../utils/translations'
 import { useSocket } from '../contexts/SocketContext'
@@ -22,6 +24,8 @@ interface User {
   attributes: string
   status: 'online' | 'offline' | 'busy'
   statusColor: string
+  profilePic?: string
+  googleProfilePic?: string
 }
 
 export default function UserListScreen({ onNext, onProfileClick, onCoinClick, onUserClick, onStartCall }: UserListScreenProps) {
@@ -30,11 +34,14 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
   const router = useRouter()
   const { socket } = useSocket()
   const [showCallModal, setShowCallModal] = useState(false)
+  const [showPermissionModal, setShowPermissionModal] = useState(false)
+  const [showPermissionDenied, setShowPermissionDenied] = useState(false)
+  const [permissionType, setPermissionType] = useState<'video' | 'audio'>('video')
   const [selectedCall, setSelectedCall] = useState<{ user: User; type: 'video' | 'audio'; rate: number } | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState(0)
-  const [incomingCall, setIncomingCall] = useState<{ callerName: string; callType: 'video' | 'audio'; channelName: string } | null>(null)
+  const [incomingCall, setIncomingCall] = useState<{ callerId: string; callerName: string; callType: 'video' | 'audio'; channelName: string } | null>(null)
   const [isRinging, setIsRinging] = useState(false)
 
   useEffect(() => {
@@ -45,9 +52,9 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
   useEffect(() => {
     if (!socket) return
 
-    socket.on('incoming-call', ({ callerName, callType, channelName }) => {
-      console.log('Incoming call received:', { callerName, callType, channelName })
-      setIncomingCall({ callerName, callType, channelName })
+    socket.on('incoming-call', ({ callerId, callerName, callType, channelName }) => {
+      console.log('Incoming call received:', { callerId, callerName, callType, channelName })
+      setIncomingCall({ callerId, callerName, callType, channelName })
     })
 
     socket.on('call-accepted', ({ channelName }) => {
@@ -57,13 +64,24 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
       const callData = sessionStorage.getItem('callData')
       if (callData) {
         const data = JSON.parse(callData)
-        router.push(data.type === 'video' ? '/video-call' : '/audio-call')
+        setTimeout(() => {
+          router.push(data.type === 'video' ? '/video-call' : '/audio-call')
+        }, 100)
       }
     })
 
     socket.on('call-declined', () => {
+      console.log('Call declined by receiver')
       setIsRinging(false)
-      alert('Call declined')
+      sessionStorage.removeItem('callData')
+      alert('Call declined by user')
+    })
+
+    socket.on('call-ended', () => {
+      console.log('Call ended by other user')
+      setIsRinging(false)
+      sessionStorage.removeItem('callData')
+      router.push('/users')
     })
 
     return () => {
@@ -101,14 +119,26 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
       
       const formattedUsers = data
         .filter((user: any) => user._id !== currentUserId)
-        .map((user: any) => ({
-          id: user._id,
-          name: user.name || 'User',
-          attributes: user.about || 'No description',
-          status: user.isActive ? 'online' : 'offline',
-          statusColor: user.isActive ? 'bg-green-500' : 'bg-gray-400',
-          profilePic: user.profilePic,
-        }))
+        .map((user: any) => {
+          // Priority: 1. Uploaded profile pic, 2. Google profile pic, 3. Dicebear
+          let displayPic = user.profilePic
+          
+          // If profilePic is a Google URL or user hasn't uploaded custom pic
+          if (!displayPic || displayPic.includes('googleusercontent.com')) {
+            // Use Google profile pic if available
+            displayPic = displayPic || null
+          }
+          
+          return {
+            id: user._id,
+            name: user.name || 'User',
+            attributes: user.about || 'No description',
+            status: user.isActive ? 'online' : 'offline',
+            statusColor: user.isActive ? 'bg-green-500' : 'bg-gray-400',
+            profilePic: displayPic,
+            googleProfilePic: displayPic && displayPic.includes('googleusercontent.com') ? displayPic : null,
+          }
+        })
       
       setUsers(formattedUsers)
     } catch (error) {
@@ -118,10 +148,49 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
     }
   }
 
-  const handleCallClick = (user: User, type: 'video' | 'audio', rate: number, e: React.MouseEvent) => {
+  const handleCallClick = async (user: User, type: 'video' | 'audio', rate: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    setSelectedCall({ user, type, rate })
-    setShowCallModal(true)
+    
+    // Check if permissions already granted
+    const permissionsGranted = localStorage.getItem('mediaPermissionsGranted')
+    
+    if (permissionsGranted === 'true') {
+      // Permissions already granted, proceed directly
+      setSelectedCall({ user, type, rate })
+      setShowCallModal(true)
+    } else {
+      // Ask for permissions first
+      setSelectedCall({ user, type, rate })
+      setPermissionType(type)
+      setShowPermissionModal(true)
+    }
+  }
+
+  const handlePermissionAllow = async () => {
+    try {
+      // Request permissions
+      if (permissionType === 'video') {
+        await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      } else {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+      }
+      
+      // Save permission granted
+      localStorage.setItem('mediaPermissionsGranted', 'true')
+      
+      // Close permission modal and show call confirmation
+      setShowPermissionModal(false)
+      setShowCallModal(true)
+    } catch (error) {
+      console.error('Permission denied:', error)
+      setShowPermissionModal(false)
+      setShowPermissionDenied(true)
+    }
+  }
+
+  const handlePermissionDeny = () => {
+    setShowPermissionModal(false)
+    setSelectedCall(null)
   }
 
   const handleConfirmCall = () => {
@@ -145,7 +214,8 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
         userAvatar: selectedCall.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedCall.user.id}`,
         rate: selectedCall.rate,
         type: selectedCall.type,
-        channelName
+        channelName,
+        otherUserId: selectedCall.user.id
       }))
       
       socket.emit('call-user', {
@@ -160,8 +230,7 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
 
   const handleAcceptCall = () => {
     if (incomingCall && socket) {
-      const user = localStorage.getItem('user')
-      const userData = user ? JSON.parse(user) : null
+      console.log('Accepting call from:', incomingCall.callerId)
       
       sessionStorage.setItem('channelName', incomingCall.channelName)
       sessionStorage.setItem('callData', JSON.stringify({
@@ -169,25 +238,27 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
         userAvatar: '',
         rate: incomingCall.callType === 'video' ? 10 : 5,
         type: incomingCall.callType,
-        channelName: incomingCall.channelName
+        channelName: incomingCall.channelName,
+        otherUserId: incomingCall.callerId
       }))
       
       socket.emit('accept-call', {
-        callerId: userData?.id,
+        callerId: incomingCall.callerId,
         channelName: incomingCall.channelName
       })
       
       setIncomingCall(null)
-      router.push(incomingCall.callType === 'video' ? '/video-call' : '/audio-call')
+      setTimeout(() => {
+        router.push(incomingCall.callType === 'video' ? '/video-call' : '/audio-call')
+      }, 100)
     }
   }
 
   const handleDeclineCall = () => {
-    if (socket) {
-      const user = localStorage.getItem('user')
-      const userData = user ? JSON.parse(user) : null
+    if (incomingCall && socket) {
+      console.log('Declining call from:', incomingCall.callerId)
       
-      socket.emit('decline-call', { callerId: userData?.id })
+      socket.emit('decline-call', { callerId: incomingCall.callerId })
       setIncomingCall(null)
     }
   }
@@ -278,6 +349,27 @@ export default function UserListScreen({ onNext, onProfileClick, onCoinClick, on
         </div>
         )}
       </div>
+
+      {showPermissionModal && (
+        <PermissionModal
+          type={permissionType}
+          onAllow={handlePermissionAllow}
+          onDeny={handlePermissionDeny}
+        />
+      )}
+
+      {showPermissionDenied && (
+        <PermissionDeniedModal
+          onClose={() => {
+            setShowPermissionDenied(false)
+            setSelectedCall(null)
+          }}
+          onRetry={() => {
+            setShowPermissionDenied(false)
+            setShowPermissionModal(true)
+          }}
+        />
+      )}
 
       {showCallModal && selectedCall && (
         <CallConfirmationScreen
