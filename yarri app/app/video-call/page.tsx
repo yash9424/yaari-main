@@ -3,6 +3,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import VideoCallScreen from '@/components/VideoCallScreen'
 
+export const dynamic = 'force-dynamic'
+
 export default function VideoCallPage() {
   const router = useRouter()
   const searchParams = useSearchParams()

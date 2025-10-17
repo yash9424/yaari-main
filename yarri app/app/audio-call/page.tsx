@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AudioCallScreen from '@/components/AudioCallScreen'
 
+export const dynamic = 'force-dynamic'
+
 export default function AudioCallPage() {
   const router = useRouter()
   const [callData, setCallData] = useState<any>(null)

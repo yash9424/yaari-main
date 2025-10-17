@@ -1,7 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { GoogleOAuthProvider } from '@react-oauth/google'
 import LoginScreen from '@/components/LoginScreen'
 
 export default function LoginPage() {
@@ -10,6 +9,19 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true)
+    
+    // Handle Google OAuth callback
+    const hash = window.location.hash
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1))
+      const accessToken = params.get('access_token')
+      
+      if (accessToken) {
+        handleGoogleCallback(accessToken)
+        return
+      }
+    }
+    
     const user = localStorage.getItem('user')
     if (user) {
       try {
@@ -23,11 +35,44 @@ export default function LoginPage() {
     }
   }, [router])
 
+  const handleGoogleCallback = async (accessToken: string) => {
+    try {
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      const userInfo = await userInfoRes.json()
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      const res = await fetch(`${apiUrl}/api/auth/google-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: userInfo.email, 
+          name: userInfo.name, 
+          googleId: userInfo.sub, 
+          profilePic: userInfo.picture 
+        }),
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
+        if (data.user.name && data.user.gender) {
+          router.push('/users')
+        } else {
+          router.push('/language')
+        }
+      } else {
+        alert('Failed to login with Google')
+      }
+    } catch (error) {
+      console.error('Google login error:', error)
+      alert('Error logging in with Google')
+    }
+  }
+
   if (!mounted) return null
   
-  return (
-    <GoogleOAuthProvider clientId="38963010109-kms7n3hb3dno6m5ol27km954mnmbf0vc.apps.googleusercontent.com">
-      <LoginScreen onNext={() => router.push('/otp')} />
-    </GoogleOAuthProvider>
-  )
+  return <LoginScreen onNext={() => router.push('/otp')} />
 }

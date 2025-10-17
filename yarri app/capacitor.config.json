@@ -1,9 +1,10 @@
 {
   "appId": "com.yaari.app",
   "appName": "Yaari",
-  "webDir": "out",
-  "bundledWebRuntime": false,
+  "webDir": ".next",
   "server": {
+    "url": "http://localhost:3001",
+    "cleartext": true,
     "androidScheme": "https"
   },
   "plugins": {

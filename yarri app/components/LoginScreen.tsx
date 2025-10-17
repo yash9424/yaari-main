@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
-import { useGoogleLogin } from '@react-oauth/google'
-import { Capacitor } from '@capacitor/core'
 import { useRouter } from 'next/navigation'
 
 interface LoginScreenProps {
@@ -17,19 +14,14 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
   const [isNative, setIsNative] = useState(false)
 
   useEffect(() => {
-    setIsNative(Capacitor.isNativePlatform())
-    if (Capacitor.isNativePlatform()) {
-      GoogleAuth.initialize({
-        clientId: '38963010109-kms7n3hb3dno6m5ol27km954mnmbf0vc.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-        grantOfflineAccess: true,
-      })
-    }
+    setIsNative(false)
   }, [])
 
   const handleGoogleLoginSuccess = async (email: string, name: string, googleId: string, profilePic: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      console.log('API URL:', apiUrl)
+      console.log('Calling:', `${apiUrl}/api/auth/google-login`)
       const res = await fetch(`${apiUrl}/api/auth/google-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,32 +46,7 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
     }
   }
 
-  const webGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        })
-        const userInfo = await userInfoRes.json()
-        
-        await handleGoogleLoginSuccess(
-          userInfo.email,
-          userInfo.name,
-          userInfo.sub,
-          userInfo.picture
-        )
-      } catch (error) {
-        console.error('Error fetching user info:', error)
-        alert('Failed to get user information')
-      } finally {
-        setGoogleLoading(false)
-      }
-    },
-    onError: () => {
-      setGoogleLoading(false)
-      alert('Google Sign-In was cancelled or failed')
-    },
-  })
+
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^0-9]/g, '')
@@ -119,27 +86,13 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
     }
   }
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true)
+  const handleGoogleSignIn = () => {
+    const clientId = '38963010109-kms7n3hb3dno6m5ol27km954mnmbf0vc.apps.googleusercontent.com'
+    const redirectUri = encodeURIComponent('com.yaari.app:/oauth2redirect')
+    const scope = encodeURIComponent('profile email')
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`
     
-    if (isNative) {
-      try {
-        const result = await GoogleAuth.signIn()
-        await handleGoogleLoginSuccess(
-          result.email,
-          result.name,
-          result.id,
-          result.imageUrl
-        )
-      } catch (error) {
-        console.error('Native Google Sign-In error:', error)
-        alert('Error signing in with Google')
-      } finally {
-        setGoogleLoading(false)
-      }
-    } else {
-      webGoogleLogin()
-    }
+    window.location.href = googleAuthUrl
   }
 
   const displayPhone = phoneNumber ? `+91 ${phoneNumber}` : '+91 '

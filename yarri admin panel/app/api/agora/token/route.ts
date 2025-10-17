@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       channelName,
       uid,
       role,
+      privilegeExpiredTs,
       privilegeExpiredTs
     )
     
